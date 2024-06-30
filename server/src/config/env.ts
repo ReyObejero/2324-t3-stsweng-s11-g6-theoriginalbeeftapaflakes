@@ -7,7 +7,7 @@ config({
     path: path.resolve(__dirname, `../../.env.${process.env.NODE_ENV}`),
 });
 
-export const ENV = {
+export const env = {
     NODE_ENV: z
         .enum(['development', 'production', 'test'])
         .parse(process.env.NODE_ENV),
@@ -17,8 +17,12 @@ export const ENV = {
     },
     jwt: {
         ACCESS_TOKEN_SECRET: z.string().parse(process.env.ACCESS_TOKEN_SECRET),
-        ACCESS_TOKEN_EXPIRE_TIME: z.coerce
-            .number()
+        ACCESS_TOKEN_EXPIRE_TIME: z
+            .string()
+            .parse(process.env.ACCESS_TOKEN_EXPIRE_TIME),
+        REFRESH_TOKEN_SECRET: z.string().parse(process.env.ACCESS_TOKEN_SECRET),
+        REFRESH_TOKEN_EXPIRE_TIME: z
+            .string()
             .parse(process.env.ACCESS_TOKEN_EXPIRE_TIME),
     },
 };

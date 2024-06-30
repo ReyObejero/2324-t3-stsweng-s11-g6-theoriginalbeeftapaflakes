@@ -1,8 +1,8 @@
-import { APP } from './app';
-import { ENV } from './config';
+import { app } from './app';
+import { env } from './config';
 
-const { PORT, HOSTNAME } = ENV.server;
+const { PORT, HOSTNAME } = env.server;
 
-APP.listen(PORT, HOSTNAME, () => {
+app.listen(PORT, HOSTNAME, () => {
     console.info(`Server is running on http://${HOSTNAME}:${PORT}`);
 });
