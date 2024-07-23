@@ -1,0 +1,8 @@
+model Cart {
+    id                Int  @id @default(autoincrement())
+    items  CartItem[]
+    user   User       @relation(fields: [userId], references: [id])
+    userId Int        @unique
+
+    @@map("carts")
+}

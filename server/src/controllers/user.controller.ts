@@ -4,20 +4,26 @@ import { userService } from '@/services';
 import { asyncRequestHandlerWrapper, sendResponse } from '@/utils';
 
 export const userController = {
-    getUsers: asyncRequestHandlerWrapper(
-        async (req: Request, res: Response): Promise<void> => {
-            const users = await userService.getUsers();
+    getMe: asyncRequestHandlerWrapper(async (req: Request, res: Response): Promise<void> => {
+        const user = await userService.getUserById(req!.jwtPayload!.userId);
 
-            sendResponse(statusCodes.SUCCESSFUL.OK, { data: { items: users } });
-        },
-    ),
+        sendResponse(res, statusCodes.successful.OK, { data: user });
+        return;
+    }),
 
-    getUserByUsername: asyncRequestHandlerWrapper(
-        async (req: Request, res: Response): Promise<void> => {
-            const { username } = req.params;
-            const user = await userService.getUserByUsername(username);
+    getUsers: asyncRequestHandlerWrapper(async (req: Request, res: Response): Promise<void> => {
+        const users = await userService.getUsers();
 
-            sendResponse(statusCodes.SUCCESSFUL.OK, { data: user });
-        },
-    ),
+        sendResponse(res, statusCodes.successful.OK, {
+            data: { items: users },
+        });
+        return;
+    }),
+
+    getUserByUsername: asyncRequestHandlerWrapper(async (req: Request, res: Response): Promise<void> => {
+        const user = await userService.getUserByUsername(req.params.username);
+
+        sendResponse(res, statusCodes.successful.OK, { data: user });
+        return;
+    }),
 };

@@ -1,26 +1,31 @@
 import { Request, Response } from 'express';
+import { env } from '@/config';
 import { statusCodes } from '@/constants';
 import { authService } from '@/services';
-import { asyncRequestHandlerWrapper, sendResponse } from '@/utils';
+import { asyncRequestHandlerWrapper, sendResponse, timeStringToMilliseconds } from '@/utils';
 
 export const authController = {
-    login: asyncRequestHandlerWrapper(
-        async (req: Request, res: Response): Promise<void> => {
-            const { username, password } = req.body;
-            const accessToken = await authService.login(username, password);
+    login: asyncRequestHandlerWrapper(async (req: Request, res: Response): Promise<void> => {
+        const { accessToken, refreshToken } = await authService.login(
+            req.body,
+            req.cookies[env.jwt.REFRESH_TOKEN_COOKIE_NAME],
+        );
 
-            sendResponse(statusCodes.SUCCESSFUL.ACCEPTED, {
-                data: { accessToken },
-            });
-        },
-    ),
+        res.clearCookie(env.jwt.REFRESH_TOKEN_COOKIE_NAME);
+        res.cookie(env.jwt.REFRESH_TOKEN_COOKIE_NAME, refreshToken, {
+            httpOnly: true,
+            maxAge: timeStringToMilliseconds(env.jwt.REFRESH_TOKEN_EXPIRE_TIME),
+            sameSite: 'none',
+        });
 
-    register: asyncRequestHandlerWrapper(
-        async (req: Request, res: Response): Promise<void> => {
-            const { username, email, password } = req.body;
-            const user = await authService.register(username, email, password);
+        sendResponse(res, statusCodes.successful.CREATED, { data: { accessToken } });
+        return;
+    }),
 
-            sendResponse(statusCodes.SUCCESSFUL.CREATED, { data: user });
-        },
-    ),
+    register: asyncRequestHandlerWrapper(async (req: Request, res: Response): Promise<void> => {
+        const user = await authService.register(req.body);
+
+        sendResponse(res, statusCodes.successful.CREATED, { data: user });
+        return;
+    }),
 };

@@ -7,22 +7,32 @@ config({
     path: path.resolve(__dirname, `../../.env.${process.env.NODE_ENV}`),
 });
 
-export const env = {
-    NODE_ENV: z
-        .enum(['development', 'production', 'test'])
-        .parse(process.env.NODE_ENV),
+const envSchema = z.object({
+    NODE_ENV: z.enum(['development', 'production', 'test']),
+    server: z.object({
+        PORT: z.coerce.number().default(3000),
+        HOSTNAME: z.string().default('localhost'),
+    }),
+    jwt: z.object({
+        ACCESS_TOKEN_SECRET: z.string(),
+        ACCESS_TOKEN_EXPIRE_TIME: z.string(),
+        REFRESH_TOKEN_SECRET: z.string(),
+        REFRESH_TOKEN_EXPIRE_TIME: z.string(),
+        REFRESH_TOKEN_COOKIE_NAME: z.string(),
+    }),
+});
+
+export const env = envSchema.parse({
+    NODE_ENV: process.env.NODE_ENV,
     server: {
-        PORT: z.coerce.number().default(3000).parse(process.env.PORT),
-        HOSTNAME: z.string().default('localhost').parse(process.env.HOSTNAME),
+        PORT: process.env.PORT,
+        HOSTNAME: process.env.HOSTNAME,
     },
     jwt: {
-        ACCESS_TOKEN_SECRET: z.string().parse(process.env.ACCESS_TOKEN_SECRET),
-        ACCESS_TOKEN_EXPIRE_TIME: z
-            .string()
-            .parse(process.env.ACCESS_TOKEN_EXPIRE_TIME),
-        REFRESH_TOKEN_SECRET: z.string().parse(process.env.ACCESS_TOKEN_SECRET),
-        REFRESH_TOKEN_EXPIRE_TIME: z
-            .string()
-            .parse(process.env.ACCESS_TOKEN_EXPIRE_TIME),
+        ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET,
+        ACCESS_TOKEN_EXPIRE_TIME: process.env.ACCESS_TOKEN_EXPIRE_TIME,
+        REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET,
+        REFRESH_TOKEN_EXPIRE_TIME: process.env.REFRESH_TOKEN_EXPIRE_TIME,
+        REFRESH_TOKEN_COOKIE_NAME: process.env.REFRESH_TOKEN_COOKIE_NAME,
     },
-};
+});

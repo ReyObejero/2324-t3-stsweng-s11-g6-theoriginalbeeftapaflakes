@@ -1,0 +1,7 @@
+model CartItem {
+    id     Int  @id @default(autoincrement())
+    cart   Cart @relation(fields: [cartId], references: [id])
+    cartId Int  @unique
+
+    @@map("cart_items")
+}
