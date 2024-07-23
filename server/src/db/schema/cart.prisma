@@ -1,5 +1,0 @@
-model Cart {
-    id          Int         @id @default(autoincrement())
-
-    @@map("carts")
-}

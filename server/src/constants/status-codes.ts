@@ -1,5 +1,5 @@
 export const statusCodes = {
-    SUCCESSFUL: {
+    successful: {
         OK: 200,
         CREATED: 201,
         ACCEPTED: 202,
@@ -11,7 +11,7 @@ export const statusCodes = {
         ALREADY_REPORTED: 208,
         I_M_USED: 226,
     },
-    REDIRECTION: {
+    redirection: {
         MULTIPLE_CHOICES: 300,
         MOVED_PERMANENTLY: 301,
         FOUND: 302,
@@ -21,7 +21,7 @@ export const statusCodes = {
         TEMPORARY_REDIRECT: 307,
         PERMANENT_REDIRECT: 308,
     },
-    CLIENT_ERROR: {
+    clientError: {
         BAD_REQUEST: 400,
         UNAUTHORIZED: 401,
         PAYMENT_REQUIRED: 402,
@@ -52,7 +52,7 @@ export const statusCodes = {
         REQUEST_HEADER_FIELDS_TOO_LARGE: 431,
         UNAVAILABLE_FOR_LEGAL_REASONS: 451,
     },
-    SERVER_ERROR: {
+    serverError: {
         INTERNAL_SERVER_ERROR: 500,
         NOT_IMPLEMENTED: 501,
         BAD_GATEWAY: 502,
