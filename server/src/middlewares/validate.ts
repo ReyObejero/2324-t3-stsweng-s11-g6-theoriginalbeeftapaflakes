@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction, RequestHandler } from 'express';
+import { type Request, type Response, type NextFunction, type RequestHandler } from 'express';
 import { type AnyZodObject } from 'zod';
 import { statusCodes } from '@/constants';
-import { sendResponse } from '@/utils';
+import createError from 'http-errors';
 
 /**
  * Validates the request object against a provided Zod schema.
@@ -38,11 +38,10 @@ export const validate =
                 message: err.message,
             }));
 
-            sendResponse(res, statusCodes.clientError.BAD_REQUEST, {
-                error: errors.length === 1 ? errors[0] : { errors },
-            });
-            return;
+            const errorPayload = errors.length === 1 ? errors[0].message : { message: errors[0].message, errors };
+
+            return next(createError(statusCodes.clientError.BAD_REQUEST, errorPayload));
         }
 
-        next();
+        return next();
     };

@@ -1,8 +1,8 @@
-import { NextFunction, Request, Response } from 'express';
-import createHttpError from 'http-errors';
-import { JwtPayload, verify, VerifyErrors } from 'jsonwebtoken';
+import { type NextFunction, type Request, type Response } from 'express';
+import createError from 'http-errors';
+import { verify, type JwtPayload, type VerifyErrors } from 'jsonwebtoken';
 import { env } from '@/config';
-import { statusCodes, validationStrings } from '@/constants';
+import { errorMessages, statusCodes } from '@/constants';
 
 /**
  * Middleware to verify the JWT access token in the authorization header.
@@ -13,7 +13,11 @@ import { statusCodes, validationStrings } from '@/constants';
  *
  * @example
  * ```
- * import { verifyAccessToken } from '/path/to/verify-auth';
+ * import { authenticate } from '/path/to/verify-auth';
+ *
+ * app.post('/some-endpoint', authenticate, async (req, res) => {
+ *     // Some action...
+ * });
  * ```
  *
  * @param req - The request object
@@ -21,19 +25,18 @@ import { statusCodes, validationStrings } from '@/constants';
  * @param next - The next function
  */
 export const authenticate = (req: Request, res: Response, next: NextFunction): void => {
-    const authorizationHeader = req.headers.authorization;
-
-    const token = authorizationHeader?.split(' ')[1];
-    if (!authorizationHeader?.startsWith('Bearer ') || !token) {
-        throw createHttpError(statusCodes.clientError.UNAUTHORIZED, validationStrings.TOKEN_NOT_FOUND_IN_AUTH_HEADER);
+    const accessToken = req.cookies[env.jwt.ACCESS_TOKEN_COOKIE_NAME];
+    if (!accessToken) {
+        return next(createError(statusCodes.clientError.UNAUTHORIZED, errorMessages.TOKEN_NOT_FOUND));
     }
 
     verify(
-        token,
+        accessToken,
         env.jwt.ACCESS_TOKEN_SECRET,
         (error: VerifyErrors | null, payload: JwtPayload | string | undefined): void => {
             if (error || !payload || typeof payload === 'string') {
-                throw createHttpError(statusCodes.clientError.FORBIDDEN, validationStrings.TOKEN_INVALID);
+                next(createError(statusCodes.clientError.UNAUTHORIZED, errorMessages.TOKEN_INVALID));
+                return;
             }
 
             req.jwtPayload = {
@@ -42,7 +45,7 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
                 exp: payload.exp,
             };
 
-            next();
+            return next();
         },
     );
 };

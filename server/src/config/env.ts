@@ -16,6 +16,7 @@ const envSchema = z.object({
     jwt: z.object({
         ACCESS_TOKEN_SECRET: z.string(),
         ACCESS_TOKEN_EXPIRE_TIME: z.string(),
+        ACCESS_TOKEN_COOKIE_NAME: z.string(),
         REFRESH_TOKEN_SECRET: z.string(),
         REFRESH_TOKEN_EXPIRE_TIME: z.string(),
         REFRESH_TOKEN_COOKIE_NAME: z.string(),
@@ -31,6 +32,7 @@ export const env = envSchema.parse({
     jwt: {
         ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET,
         ACCESS_TOKEN_EXPIRE_TIME: process.env.ACCESS_TOKEN_EXPIRE_TIME,
+        ACCESS_TOKEN_COOKIE_NAME: process.env.ACCESS_TOKEN_COOKIE_NAME,
         REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET,
         REFRESH_TOKEN_EXPIRE_TIME: process.env.REFRESH_TOKEN_EXPIRE_TIME,
         REFRESH_TOKEN_COOKIE_NAME: process.env.REFRESH_TOKEN_COOKIE_NAME,

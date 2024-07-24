@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { env } from '@/config';
-import { UserRole } from '@/interfaces/entities';
+import { type UserRole } from '@/interfaces/entities';
 
 export const generateAccessToken = (userId: number, role: UserRole): string => {
     return jwt.sign({ userId, role }, env.jwt.ACCESS_TOKEN_SECRET, {
