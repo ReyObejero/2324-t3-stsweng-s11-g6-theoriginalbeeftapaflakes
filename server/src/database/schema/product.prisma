@@ -1,0 +1,11 @@
+model Product {
+    id          Int       @id @default(autoincrement())
+    name        String    @unique
+    description String
+    ingredients String
+    numReviews  Int       @default(0) @map("num_reviews")
+    rating      Float     @default(0.0)
+    packages    Package[]
+
+    @@map("products")
+}

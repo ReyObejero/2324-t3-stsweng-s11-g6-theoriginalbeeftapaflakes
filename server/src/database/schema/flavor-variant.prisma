@@ -1,0 +1,10 @@
+model FlavorVariant {
+    id           Int           @id @default(autoincrement())
+    flavorId     Int           @map("flavor_id")
+    flavor       Flavor        @relation(fields: [flavorId], references: [id])
+    size         String
+    stock        Int
+    packageItems PackageItem[]
+
+    @@map("flavor_variants")
+}

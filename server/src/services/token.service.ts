@@ -1,7 +1,7 @@
+import { type RefreshToken } from '@prisma/client';
 import createError from 'http-errors';
 import { errorMessages, statusCodes } from '@/constants';
 import { prismaClient } from '@/database';
-import { RefreshToken } from '@/interfaces/entities';
 
 export const tokenService = {
     createRefreshToken: async (userId: number, token: string): Promise<RefreshToken> => {

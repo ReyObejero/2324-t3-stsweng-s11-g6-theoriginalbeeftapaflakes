@@ -1,4 +1,4 @@
-import { UserRole } from '@/interfaces/entities';
+import { type UserRole } from '@prisma/client';
 
 declare module 'jsonwebtoken' {
     export interface JwtPayload {
