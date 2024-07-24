@@ -35,8 +35,7 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
         env.jwt.ACCESS_TOKEN_SECRET,
         (error: VerifyErrors | null, payload: JwtPayload | string | undefined): void => {
             if (error || !payload || typeof payload === 'string') {
-                next(createError(statusCodes.clientError.UNAUTHORIZED, errorMessages.TOKEN_INVALID));
-                return;
+                return next(createError(statusCodes.clientError.UNAUTHORIZED, errorMessages.TOKEN_INVALID));
             }
 
             req.jwtPayload = {
@@ -50,4 +49,10 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
     );
 };
 
-export const protect = {};
+export const protect = (req: Request, res: Response, next: NextFunction): void => {
+    if (req.jwtPayload?.role !== 'ADMIN') {
+        next(createError(statusCodes.clientError.FORBIDDEN, errorMessages.ACCESS_DENIED));
+    }
+
+    return next();
+};
