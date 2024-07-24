@@ -1,4 +1,5 @@
 export const errorMessages = {
+    ACCESS_DENIED: 'Access is denied.',
     EMAIL_ALREADY_REGISTERED: 'Email is already registered.',
     EMAIL_INVALID: 'Email is invalid.',
     EMAIL_NOT_REGISTERED: 'Email is not registered.',
