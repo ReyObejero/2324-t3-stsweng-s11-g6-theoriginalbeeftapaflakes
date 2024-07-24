@@ -1,10 +1,10 @@
 import { hash, verify } from 'argon2';
-import createHttpError from 'http-errors';
-import { statusCodes, validationStrings } from '@/constants';
+import createError from 'http-errors';
+import { errorMessages, statusCodes } from '@/constants';
 import { prismaClient } from '@/database';
 import { User } from '@/interfaces/entities';
 import { generateAccessToken, generateRefreshToken } from '@/utils';
-import { refreshTokenService } from './refresh-token.service';
+import { tokenService } from './token.service';
 import { userService } from './user.service';
 
 interface LoginInput {
@@ -19,44 +19,70 @@ interface RegisterInput {
 }
 
 export const authService = {
-    login: async (input: LoginInput, refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> => {
+    login: async (
+        input: LoginInput,
+        refreshToken: string,
+    ): Promise<{ accessToken: string; refreshToken: string; user: User }> => {
         const { username, password } = input;
+
+        if (!username) {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USERNAME_REQUIRED);
+        }
+
+        if (!password) {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.PASSWORD_REQUIRED);
+        }
 
         const user = await userService.getUserByUsername(username);
         if (!user) {
-            throw createHttpError(statusCodes.clientError.NOT_FOUND, validationStrings.USERNAME_NOT_REGISTERED);
+            throw createError(statusCodes.clientError.NOT_FOUND, errorMessages.USERNAME_NOT_REGISTERED);
         }
 
         if (!(await verify(user.password, password))) {
-            throw createHttpError(statusCodes.clientError.UNAUTHORIZED, validationStrings.PASSWORD_INVALID);
+            throw createError(statusCodes.clientError.UNAUTHORIZED, errorMessages.PASSWORD_INVALID);
         }
 
-        const existingRefreshToken = await refreshTokenService.getRefreshTokenByToken(refreshToken);
-        if (!existingRefreshToken || existingRefreshToken.userId != user.id) {
-            await refreshTokenService.deleteRefreshTokensByUserId(user.id);
-        } else {
-            await refreshTokenService.deleteRefreshTokenByToken(existingRefreshToken.token);
+        if (refreshToken) {
+            const existingRefreshToken = await tokenService.getRefreshTokenByToken(refreshToken);
+            if (!existingRefreshToken || existingRefreshToken.userId != user.id) {
+                await tokenService.deleteRefreshTokensByUserId(user.id);
+            } else {
+                await tokenService.deleteRefreshTokenByToken(existingRefreshToken.token);
+            }
         }
 
         const accessToken = generateAccessToken(user.id, user.role);
         const newRefreshToken = generateRefreshToken(user.id, user.role);
-        await refreshTokenService.createRefreshToken(user.id, newRefreshToken);
+        await tokenService.createRefreshToken(user.id, newRefreshToken);
 
         return {
             accessToken,
             refreshToken: newRefreshToken,
+            user,
         };
     },
 
     register: async (input: RegisterInput): Promise<User> => {
         const { username, email, password } = input;
 
+        if (!username) {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USERNAME_REQUIRED);
+        }
+
+        if (!email) {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.EMAIL_REQUIRED);
+        }
+
+        if (!password) {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USERNAME_REQUIRED);
+        }
+
         if (await userService.getUserByUsername(username)) {
-            throw createHttpError(statusCodes.clientError.CONFLICT, validationStrings.USERNAME_ALREADY_REGISTERED);
+            throw createError(statusCodes.clientError.CONFLICT, errorMessages.USERNAME_ALREADY_REGISTERED);
         }
 
         if (await userService.getUserByEmail(email)) {
-            throw createHttpError(statusCodes.clientError.CONFLICT, validationStrings.EMAIL_ALREADY_REGISTERED);
+            throw createError(statusCodes.clientError.CONFLICT, errorMessages.EMAIL_ALREADY_REGISTERED);
         }
 
         return await prismaClient.user.create({

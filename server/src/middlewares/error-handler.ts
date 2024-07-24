@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from 'express';
-import { HttpError } from 'http-errors';
-import { statusCodes } from '@/constants';
+import { type Request, type Response, type NextFunction } from 'express';
+import { type HttpError } from 'http-errors';
+import { errorMessages, statusCodes } from '@/constants';
 import { sendResponse } from '@/utils';
 
 /**
@@ -22,11 +22,12 @@ import { sendResponse } from '@/utils';
  */
 export const errorHandler = (err: HttpError, req: Request, res: Response, next: NextFunction): void => {
     if (res.headersSent) {
-        next(err);
+        return next(err);
     }
 
-    sendResponse(res, err.statusCode ? err.statusCode : statusCodes.serverError.INTERNAL_SERVER_ERROR, {
-        error: { message: err.message ? err.message : 'Internal Server Error' },
-    });
-    return;
+    const statusCode = err.statusCode || statusCodes.serverError.INTERNAL_SERVER_ERROR;
+    const errorMessage = err.message || errorMessages.INTERNAL_SERVER_ERROR;
+    const errorPayload = { message: errorMessage, ...(err.errors && { errors: err.errors }) };
+
+    return sendResponse(res, statusCode, errorPayload);
 };

@@ -1,4 +1,4 @@
-import { UserRole } from '../../interfaces/entities';
+import { UserRole } from '@/interfaces/entities';
 
 declare module 'jsonwebtoken' {
     export interface JwtPayload {
