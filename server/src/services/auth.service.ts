@@ -1,8 +1,8 @@
+import { type User } from '@prisma/client';
 import { hash, verify } from 'argon2';
 import createError from 'http-errors';
 import { errorMessages, statusCodes } from '@/constants';
 import { prismaClient } from '@/database';
-import { User } from '@/interfaces/entities';
 import { generateAccessToken, generateRefreshToken } from '@/utils';
 import { tokenService } from './token.service';
 import { userService } from './user.service';

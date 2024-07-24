@@ -1,7 +1,7 @@
+import { type User } from '@prisma/client';
 import createError from 'http-errors';
 import { errorMessages, statusCodes } from '@/constants';
 import { prismaClient } from '@/database';
-import { User } from '@/interfaces/entities';
 
 export const userService = {
     getUserByEmail: async (email: string): Promise<User | null> => {

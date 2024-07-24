@@ -7,6 +7,7 @@ export const errorMessages = {
     INTERNAL_SERVER_ERROR: 'Internal Server Error',
     PASSWORD_INVALID: 'Password is invalid.',
     PASSWORD_REQUIRED: 'Password is required.',
+    PRODUCT_ID_REQUIRED: 'Product ID is required.',
     RESOURCE_NOT_FOUND: 'Resource not found.',
     TOKEN_INVALID: 'Token is invalid.',
     TOKEN_NOT_FOUND: 'Token not found.',
