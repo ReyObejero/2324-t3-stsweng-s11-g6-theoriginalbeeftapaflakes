@@ -12,6 +12,7 @@ export const errorMessages = {
     TOKEN_INVALID: 'Token is invalid.',
     TOKEN_NOT_FOUND: 'Token not found.',
     TOKEN_REQUIRED: 'Token is required.',
+    PRODUCT_ID_MUST_BE_A_NUMBER: 'Product ID must be a number.',
     USER_ID_INVALID: 'User ID is invalid.',
     USER_ID_REQUIRED: 'User ID is required.',
     USERNAME_ALREADY_REGISTERED: 'Username is already registered.',
