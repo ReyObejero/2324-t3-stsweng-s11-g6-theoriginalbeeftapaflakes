@@ -26,16 +26,16 @@ export const authService = {
         const { username, password } = input;
 
         if (!username) {
-            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USERNAME_REQUIRED);
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USERNAME_INVALID);
         }
 
         if (!password) {
-            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.PASSWORD_REQUIRED);
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.PASSWORD_INVALID);
         }
 
         const user = await userService.getUserByUsername(username);
         if (!user) {
-            throw createError(statusCodes.clientError.NOT_FOUND, errorMessages.USERNAME_NOT_REGISTERED);
+            throw createError(statusCodes.clientError.NOT_FOUND, errorMessages.USERNAME_INVALID);
         }
 
         if (!(await verify(user.password, password))) {
@@ -66,23 +66,23 @@ export const authService = {
         const { username, email, password } = input;
 
         if (!username) {
-            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USERNAME_REQUIRED);
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USERNAME_INVALID);
         }
 
         if (!email) {
-            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.EMAIL_REQUIRED);
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.EMAIL_INVALID);
         }
 
         if (!password) {
-            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USERNAME_REQUIRED);
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USERNAME_INVALID);
         }
 
         if (await userService.getUserByUsername(username)) {
-            throw createError(statusCodes.clientError.CONFLICT, errorMessages.USERNAME_ALREADY_REGISTERED);
+            throw createError(statusCodes.clientError.CONFLICT, errorMessages.USERNAME_ALREADY_IN_USE);
         }
 
         if (await userService.getUserByEmail(email)) {
-            throw createError(statusCodes.clientError.CONFLICT, errorMessages.EMAIL_ALREADY_REGISTERED);
+            throw createError(statusCodes.clientError.CONFLICT, errorMessages.EMAIL_ALREADY_IN_USE);
         }
 
         return await prismaClient.user.create({

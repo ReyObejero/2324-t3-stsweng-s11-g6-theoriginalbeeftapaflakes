@@ -21,6 +21,11 @@ const envSchema = z.object({
         REFRESH_TOKEN_EXPIRE_TIME: z.string(),
         REFRESH_TOKEN_COOKIE_NAME: z.string(),
     }),
+    cloudinary: z.object({
+        CLOUD_NAME: z.string(),
+        API_KEY: z.string(),
+        API_SECRET: z.string(),
+    }),
 });
 
 export const env = envSchema.parse({
@@ -36,5 +41,10 @@ export const env = envSchema.parse({
         REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET,
         REFRESH_TOKEN_EXPIRE_TIME: process.env.REFRESH_TOKEN_EXPIRE_TIME,
         REFRESH_TOKEN_COOKIE_NAME: process.env.REFRESH_TOKEN_COOKIE_NAME,
+    },
+    cloudinary: {
+        CLOUD_NAME: process.env.CLOUD_NAME,
+        API_KEY: process.env.API_KEY,
+        API_SECRET: process.env.API_SECRET,
     },
 });
