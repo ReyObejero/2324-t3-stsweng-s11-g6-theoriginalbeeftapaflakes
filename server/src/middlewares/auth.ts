@@ -27,7 +27,12 @@ import { errorMessages, statusCodes } from '@/constants';
 export const authenticate = (req: Request, res: Response, next: NextFunction): void => {
     const accessToken = req.cookies[env.jwt.ACCESS_TOKEN_COOKIE_NAME];
     if (!accessToken) {
-        return next(createError(statusCodes.clientError.UNAUTHORIZED, errorMessages.TOKEN_NOT_FOUND));
+        return next(
+            createError(
+                statusCodes.clientError.UNAUTHORIZED,
+                accessToken === undefined ? errorMessages.TOKEN_NOT_FOUND : errorMessages.TOKEN_INVALID,
+            ),
+        );
     }
 
     verify(

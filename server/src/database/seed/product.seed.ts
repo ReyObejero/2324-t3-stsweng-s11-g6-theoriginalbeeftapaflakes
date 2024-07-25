@@ -77,6 +77,8 @@ async function main() {
                 description:
                     "Discover convenience and profit with our sub-reseller's package! Enjoy free marketing ads, no freezer needed, and high profits. Selling is easy and customers keep coming back!",
                 ingredients: 'Beef, Salt, Pepper, Soy Sauce, Vinegar, Mixed Spices, and Vegetable Oil',
+                imageUrl:
+                    'https://res.cloudinary.com/dqfjotjba/image/upload/v1721909946/the_original_beef_tapa_flakes/products/sub-reseller-package.jpg',
                 packages: {
                     create: [
                         {
@@ -135,6 +137,8 @@ async function main() {
                 description:
                     "Avail the Reseller's package deal! Enjoy complimentary perks such as free delivery, rebranding (including layout, label, and packaging), a tarpaulin, and exclusive marketing ads featured on our main page. With no need for a freezer, expect great profits and effortless sales. It's the perfect choice for guaranteed repeat buyers!",
                 ingredients: 'Beef, Salt, Pepper, Soy Sauce, Vinegar, Mixed Spices, and Vegetable Oil',
+                imageUrl:
+                    'https://res.cloudinary.com/dqfjotjba/image/upload/v1721910044/the_original_beef_tapa_flakes/products/reseller-package.jpg',
                 packages: {
                     create: [
                         {
@@ -193,6 +197,8 @@ async function main() {
                 description:
                     'You can never go wrong with the most talked about tapa in town! Stop wondering and have a taste of our savory tapa in a jar! No need to cook and ready to eat! It comes with three bursting flavors of Classic, Spicy and Sisig.',
                 ingredients: 'Beef, Salt, Pepper, Soy Sauce, Vinegar, Mixed Spices, and Vegetable Oil',
+                imageUrl:
+                    'https://res.cloudinary.com/dqfjotjba/image/upload/v1721910049/the_original_beef_tapa_flakes/products/the-original-beef-tapa-flakes-330g.jpg',
                 packages: {
                     create: [
                         {

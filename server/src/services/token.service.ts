@@ -6,11 +6,11 @@ import { prismaClient } from '@/database';
 export const tokenService = {
     createRefreshToken: async (userId: number, token: string): Promise<RefreshToken> => {
         if (!userId) {
-            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USER_ID_REQUIRED);
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USER_ID_INVALID);
         }
 
         if (!token) {
-            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.TOKEN_REQUIRED);
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.TOKEN_INVALID);
         }
 
         return await prismaClient.refreshToken.create({ data: { userId, token } });
@@ -18,18 +18,18 @@ export const tokenService = {
 
     deleteRefreshTokensByUserId: async (userId: number): Promise<RefreshToken[]> => {
         if (!userId) {
-            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USER_ID_REQUIRED);
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USER_ID_INVALID);
         }
 
-        const affectedRefreshTokens = await tokenService.getRefreshTokensByUserId(userId);
+        const refreshTokens = await tokenService.getRefreshTokensByUserId(userId);
         await prismaClient.refreshToken.deleteMany({ where: { id: userId } });
 
-        return affectedRefreshTokens;
+        return refreshTokens;
     },
 
     deleteRefreshTokenByToken: async (token: string): Promise<RefreshToken> => {
         if (!token) {
-            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.TOKEN_REQUIRED);
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.TOKEN_INVALID);
         }
 
         if (!(await tokenService.getRefreshTokenByToken(token))) {
@@ -41,7 +41,7 @@ export const tokenService = {
 
     getRefreshTokenByToken: async (token: string): Promise<RefreshToken | null> => {
         if (!token) {
-            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.TOKEN_REQUIRED);
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.TOKEN_INVALID);
         }
 
         return await prismaClient.refreshToken.findUnique({ where: { token } });
@@ -49,7 +49,7 @@ export const tokenService = {
 
     getRefreshTokensByUserId: async (userId: number): Promise<RefreshToken[]> => {
         if (!userId) {
-            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USER_ID_REQUIRED);
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USER_ID_INVALID);
         }
 
         return await prismaClient.refreshToken.findMany({ where: { userId } });
