@@ -8,5 +8,6 @@ const cartRouter = Router();
 cartRouter.post('/:productId/:packageId', authenticate, validate(createCartItemSchema), cartController.createCartItem);
 cartRouter.get('/', cartController.getCarts);
 cartRouter.get('/me', authenticate, cartController.getAuthenticatedUserCart);
+cartRouter.delete('/', authenticate, protect, cartController.deleteCarts);
 
 export { cartRouter };
