@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { errorMessages } from '@/constants';
 
-export const createCartItemSchema = z.object({
+export const handlecartItemSchema = z.object({
     params: z.object({
         productId: z
             .string({ message: errorMessages.PRODUCT_ID_INVALID })
@@ -13,8 +13,6 @@ export const createCartItemSchema = z.object({
             .refine((packageId) => !isNaN(packageId), { message: errorMessages.PACKAGE_ID_INVALID }),
     }),
     body: z.object({
-        quantity: z
-            .number({ message: errorMessages.QUANTITY_INVALID })
-            .refine((quantity) => quantity > 0, { message: errorMessages.QUANTITY_INVALID }),
+        quantity: z.number({ message: errorMessages.QUANTITY_INVALID }),
     }),
 });
