@@ -54,7 +54,7 @@ export const cartService = {
         });
     },
 
-    handleCartItem: async (
+    createCartItem: async (
         userId: number,
         productId: number,
         packageId: number,
@@ -72,7 +72,7 @@ export const cartService = {
             throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.PACKAGE_ID_INVALID);
         }
 
-        if (quantity === null || quantity === undefined) {
+        if (!quantity) {
             throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.QUANTITY_INVALID);
         }
 
@@ -96,10 +96,6 @@ export const cartService = {
 
         let existingCartItem = await cartService.getCartItemByPackage(cart.id, productId, packageId);
         if (!existingCartItem) {
-            if (quantity <= 0) {
-                throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.QUANTITY_INVALID);
-            }
-
             const cartItem = await prismaClient.cartItem.create({
                 data: {
                     cartId: cart?.id,
@@ -118,22 +114,12 @@ export const cartService = {
 
             return cartItem;
         } else {
-            if (quantity != 0) {
-                existingCartItem = await cartService.updateCartItem(existingCartItem.id, quantity);
-                await cartService.updateCartTotalPrice(cart.id);
+            existingCartItem = await cartService.updateCartItem(
+                existingCartItem.id,
+                existingCartItem.quantity + quantity,
+            );
 
-                return existingCartItem;
-            } else {
-                existingCartItem = await cartService.deleteCartItem(
-                    existingCartItem.cartId,
-                    existingCartItem.productId,
-                    existingCartItem.packageId,
-                );
-                existingCartItem.quantity = 0;
-                await cartService.updateCartTotalPrice(cart.id);
-
-                return existingCartItem;
-            }
+            return existingCartItem;
         }
     },
 
@@ -261,7 +247,6 @@ export const cartService = {
         }
 
         const cartItems = await cartService.getCartItemsByCartId(cartId);
-
         const newTotalPrice = cartItems.reduce(
             (accumulator, currentCartItem) => accumulator + currentCartItem.price,
             0,
@@ -286,52 +271,38 @@ export const cartService = {
             throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.CART_ITEM_ID_INVALID);
         }
 
+        if (!quantity) {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.QUANTITY_INVALID);
+        }
+
+        let cartItem = await cartService.getCartItemById(cartItemId);
+        if (!cartItem) {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.CART_ITEM_ID_INVALID);
+        }
+
+        cartItem = await prismaClient.cartItem.update({
+            where: { id: cartItemId },
+            data: {
+                quantity,
+            },
+            include: { product: true, package: true },
+        });
+
+        await cartService.updateCartTotalPrice(cartItem.cartId);
+
+        return cartItem;
+    },
+
+    deleteCartItem: async (cartItemId: number): Promise<DetailedCartItem> => {
+        if (!cartItemId) {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.CART_ITEM_ID_INVALID);
+        }
+
         const cartItem = await cartService.getCartItemById(cartItemId);
         if (!cartItem) {
             throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.CART_ITEM_ID_INVALID);
         }
 
-        const newQuantity = cartItem.quantity + quantity;
-
-        return await prismaClient.cartItem.update({
-            where: { id: cartItemId },
-            data: {
-                quantity: newQuantity,
-                price: cartItem.package.price * newQuantity,
-            },
-            include: { product: true, package: true },
-        });
-    },
-
-    deleteCartItem: async (cartId: number, productId: number, packageId: number): Promise<DetailedCartItem> => {
-        if (!cartId) {
-            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.CART_ID_INVALID);
-        }
-
-        if (!productId) {
-            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.PRODUCT_ID_INVALID);
-        }
-
-        if (!packageId) {
-            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.PACKAGE_ID_INVALID);
-        }
-
-        if (!(await cartService.getCartById(cartId))) {
-            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.CART_ID_INVALID);
-        }
-
-        if (!(await productService.getProduct(productId))) {
-            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.PRODUCT_ID_INVALID);
-        }
-
-        if (!(await productService.getProduct(productId))) {
-            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.PACKAGE_ID_INVALID);
-        }
-
-        const cartItem = await cartService.getCartItemByPackage(cartId, productId, packageId);
-        if (!cartItem) {
-            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.CART_ITEM_ID_INVALID);
-        }
         await prismaClient.cartItem.delete({ where: { id: cartItem.id } });
 
         return cartItem;

@@ -20,6 +20,6 @@ export const productController = {
         const { productId, packageId } = req.params;
         const productPackage = await productService.deletePackage(Number(productId), Number(packageId));
 
-        return sendResponse(res, statusCodes.successful.OK, { data: { deleted: true, ...productPackage } });
+        return sendResponse(res, statusCodes.successful.OK, { data: productPackage });
     }),
 };

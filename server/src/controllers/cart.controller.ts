@@ -4,9 +4,9 @@ import { cartService } from '@/services';
 import { asyncRequestHandlerWrapper, sendResponse } from '@/utils';
 
 export const cartController = {
-    handleCartItem: asyncRequestHandlerWrapper(async (req: Request, res: Response): Promise<void> => {
+    createCartItem: asyncRequestHandlerWrapper(async (req: Request, res: Response): Promise<void> => {
         const { productId, packageId } = req.params;
-        const cartItem = await cartService.handleCartItem(
+        const cartItem = await cartService.createCartItem(
             req!.jwtPayload!.userId,
             Number(productId),
             Number(packageId),
@@ -28,9 +28,14 @@ export const cartController = {
         return sendResponse(res, statusCodes.successful.OK, { data: { items: carts } });
     }),
 
+    updateCartItem: asyncRequestHandlerWrapper(async (req: Request, res: Response): Promise<void> => {
+        const cart = await cartService.updateCartItem(Number(req.params.cartItemId), req.body.quantity);
+
+        return sendResponse(res, statusCodes.successful.OK, { data: { cart } });
+    }),
+
     deleteCartItem: asyncRequestHandlerWrapper(async (req: Request, res: Response): Promise<void> => {
-        const { productId, packageId } = req.params;
-        const cartItem = await cartService.deleteCartItem(req.body.cartId, Number(productId), Number(packageId));
+        const cartItem = await cartService.deleteCartItem(Number(req.params.cartItemId));
 
         return sendResponse(res, statusCodes.successful.OK, { data: cartItem });
     }),
