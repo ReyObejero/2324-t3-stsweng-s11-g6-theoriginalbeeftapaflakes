@@ -5,7 +5,7 @@ import { authenticate } from '@/middlewares';
 const userRouter = Router();
 
 userRouter.get('/', userController.getUsers);
-userRouter.get('/me', authenticate, userController.getMe);
-userRouter.get('/:username', userController.getUserByUsername);
+userRouter.get('/me', authenticate, userController.getAuthenticatedUser);
+userRouter.get('/:username', userController.getUser);
 
 export { userRouter };

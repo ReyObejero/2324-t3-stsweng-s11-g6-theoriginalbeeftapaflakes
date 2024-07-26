@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient, type Package, type Product } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import createError from 'http-errors';
 import { errorMessages, statusCodes } from '@/constants';
 import { prismaClient } from '@/database';

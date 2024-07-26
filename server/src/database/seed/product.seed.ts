@@ -1,4 +1,4 @@
-import { prismaClient } from '../database';
+import { prismaClient } from '../prisma';
 
 async function main() {
     const flavors = {
