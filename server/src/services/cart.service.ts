@@ -54,7 +54,7 @@ export const cartService = {
         });
     },
 
-    createCartItem: async (
+    handleCartItem: async (
         userId: number,
         productId: number,
         packageId: number,
@@ -72,17 +72,15 @@ export const cartService = {
             throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.PACKAGE_ID_INVALID);
         }
 
-        if (!quantity) {
+        if (quantity === null || quantity === undefined) {
             throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.QUANTITY_INVALID);
         }
 
-        const user = await userService.getUserById(userId);
-        if (!user) {
+        if (!(await userService.getUserById(userId))) {
             throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USER_ID_INVALID);
         }
 
-        const product = await productService.getProduct(productId);
-        if (!product) {
+        if (!(await productService.getProduct(productId))) {
             throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.PRODUCT_ID_INVALID);
         }
 
@@ -98,6 +96,10 @@ export const cartService = {
 
         let existingCartItem = await cartService.getCartItemByPackage(cart.id, productId, packageId);
         if (!existingCartItem) {
+            if (quantity <= 0) {
+                throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.QUANTITY_INVALID);
+            }
+
             const cartItem = await prismaClient.cartItem.create({
                 data: {
                     cartId: cart?.id,
@@ -116,10 +118,22 @@ export const cartService = {
 
             return cartItem;
         } else {
-            existingCartItem = await cartService.updateCartItem(existingCartItem.id, quantity);
-            await cartService.updateCartTotalPrice(cart.id);
+            if (quantity != 0) {
+                existingCartItem = await cartService.updateCartItem(existingCartItem.id, quantity);
+                await cartService.updateCartTotalPrice(cart.id);
 
-            return existingCartItem;
+                return existingCartItem;
+            } else {
+                existingCartItem = await cartService.deleteCartItem(
+                    existingCartItem.cartId,
+                    existingCartItem.productId,
+                    existingCartItem.packageId,
+                );
+                existingCartItem.quantity = 0;
+                await cartService.updateCartTotalPrice(cart.id);
+
+                return existingCartItem;
+            }
         }
     },
 
@@ -287,6 +301,40 @@ export const cartService = {
             },
             include: { product: true, package: true },
         });
+    },
+
+    deleteCartItem: async (cartId: number, productId: number, packageId: number): Promise<DetailedCartItem> => {
+        if (!cartId) {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.CART_ID_INVALID);
+        }
+
+        if (!productId) {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.PRODUCT_ID_INVALID);
+        }
+
+        if (!packageId) {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.PACKAGE_ID_INVALID);
+        }
+
+        if (!(await cartService.getCartById(cartId))) {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.CART_ID_INVALID);
+        }
+
+        if (!(await productService.getProduct(productId))) {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.PRODUCT_ID_INVALID);
+        }
+
+        if (!(await productService.getProduct(productId))) {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.PACKAGE_ID_INVALID);
+        }
+
+        const cartItem = await cartService.getCartItemByPackage(cartId, productId, packageId);
+        if (!cartItem) {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.CART_ITEM_ID_INVALID);
+        }
+        await prismaClient.cartItem.delete({ where: { id: cartItem.id } });
+
+        return cartItem;
     },
 
     deleteCarts: async (): Promise<DetailedCart[]> => {
