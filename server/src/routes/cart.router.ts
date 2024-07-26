@@ -1,14 +1,20 @@
 import { Router } from 'express';
 import { cartController } from '@/controllers';
 import { authenticate, protect, validate } from '@/middlewares';
-import { deleteCartItemSchema, handleCartItemSchema } from '@/validations';
+import { deleteCartItemSchema, createCartItemSchema, updateCartItemSchema } from '@/validations';
 
 const cartRouter = Router();
 
-cartRouter.post('/:productId/:packageId', authenticate, validate(handleCartItemSchema), cartController.handleCartItem);
+cartRouter.post(
+    '/items/:productId/:packageId',
+    authenticate,
+    validate(createCartItemSchema),
+    cartController.createCartItem,
+);
 cartRouter.get('/', cartController.getCarts);
 cartRouter.get('/me', authenticate, cartController.getAuthenticatedUserCart);
-cartRouter.delete('/', authenticate, validate(deleteCartItemSchema), cartController.deleteCarts);
-cartRouter.delete('/:productId/:packageId', authenticate, protect, cartController.deleteCartItem);
+cartRouter.put('/items/:cartItemId', authenticate, validate(updateCartItemSchema), cartController.updateCartItem);
+cartRouter.delete('/', authenticate, protect, cartController.deleteCarts);
+cartRouter.delete('/items/:cartItemId', authenticate, validate(deleteCartItemSchema), cartController.deleteCartItem);
 
 export { cartRouter };
