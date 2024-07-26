@@ -6,6 +6,7 @@ model Product {
     imageUrl    String
     numReviews  Int       @default(0) @map("num_reviews")
     rating      Float     @default(0.0)
+    cartItems   CartItem[]
     packages    Package[]
 
     @@map("products")
