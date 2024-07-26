@@ -17,13 +17,19 @@ export const cartController = {
     }),
 
     getAuthenticatedUserCart: asyncRequestHandlerWrapper(async (req: Request, res: Response): Promise<void> => {
-        const cart = await cartService.getCart(req!.jwtPayload!.userId);
+        const cart = await cartService.getCartByUserId(req!.jwtPayload!.userId);
 
         return sendResponse(res, statusCodes.successful.OK, { data: cart });
     }),
 
     getCarts: asyncRequestHandlerWrapper(async (req: Request, res: Response): Promise<void> => {
         const carts = await cartService.getCarts();
+
+        return sendResponse(res, statusCodes.successful.OK, { data: { items: carts } });
+    }),
+
+    deleteCarts: asyncRequestHandlerWrapper(async (req: Request, res: Response): Promise<void> => {
+        const carts = await cartService.deleteCarts();
 
         return sendResponse(res, statusCodes.successful.OK, { data: { items: carts } });
     }),
