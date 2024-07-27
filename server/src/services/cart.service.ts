@@ -23,6 +23,24 @@ export type DetailedCartItem = Prisma.CartItemGetPayload<{
     };
 }>;
 
+const detailedCartQueryArgs = {
+    include: {
+        items: {
+            include: {
+                product: true,
+                package: true,
+            },
+        },
+    },
+};
+
+const detailedCartItemQueryArgs = {
+    include: {
+        product: true,
+        package: true,
+    },
+};
+
 export const cartService = {
     createCart: async (userId: number): Promise<DetailedCart> => {
         if (!userId) {
@@ -43,14 +61,7 @@ export const cartService = {
             data: {
                 userId,
             },
-            include: {
-                items: {
-                    include: {
-                        product: true,
-                        package: true,
-                    },
-                },
-            },
+            ...detailedCartQueryArgs,
         });
     },
 
@@ -104,10 +115,7 @@ export const cartService = {
                     quantity,
                     price: productPackage?.price * quantity,
                 },
-                include: {
-                    product: true,
-                    package: true,
-                },
+                ...detailedCartItemQueryArgs,
             });
 
             await cartService.updateCartTotalPrice(cart.id);
@@ -132,14 +140,7 @@ export const cartService = {
             where: {
                 id: cartId,
             },
-            include: {
-                items: {
-                    include: {
-                        product: true,
-                        package: true,
-                    },
-                },
-            },
+            ...detailedCartQueryArgs,
         });
     },
 
@@ -152,14 +153,7 @@ export const cartService = {
             where: {
                 userId,
             },
-            include: {
-                items: {
-                    include: {
-                        product: true,
-                        package: true,
-                    },
-                },
-            },
+            ...detailedCartQueryArgs,
         });
     },
 
@@ -172,10 +166,7 @@ export const cartService = {
             where: {
                 id: cartItemId,
             },
-            include: {
-                product: true,
-                package: true,
-            },
+            ...detailedCartItemQueryArgs,
         });
     },
 
@@ -202,10 +193,7 @@ export const cartService = {
                 productId,
                 packageId,
             },
-            include: {
-                product: true,
-                package: true,
-            },
+            ...detailedCartItemQueryArgs,
         });
     },
 
@@ -216,24 +204,12 @@ export const cartService = {
 
         return await prismaClient.cartItem.findMany({
             where: { cartId },
-            include: {
-                product: true,
-                package: true,
-            },
+            ...detailedCartItemQueryArgs,
         });
     },
 
     getCarts: async (): Promise<DetailedCart[]> => {
-        return await prismaClient.cart.findMany({
-            include: {
-                items: {
-                    include: {
-                        product: true,
-                        package: true,
-                    },
-                },
-            },
-        });
+        return await prismaClient.cart.findMany(detailedCartQueryArgs);
     },
 
     updateCartTotalPrice: async (cartId: number): Promise<DetailedCart> => {
@@ -255,14 +231,7 @@ export const cartService = {
         return await prismaClient.cart.update({
             where: { id: cartId },
             data: { totalPrice: newTotalPrice },
-            include: {
-                items: {
-                    include: {
-                        product: true,
-                        package: true,
-                    },
-                },
-            },
+            ...detailedCartQueryArgs,
         });
     },
 
@@ -285,7 +254,7 @@ export const cartService = {
             data: {
                 quantity,
             },
-            include: { product: true, package: true },
+            ...detailedCartItemQueryArgs,
         });
 
         await cartService.updateCartTotalPrice(cartItem.cartId);
