@@ -4,6 +4,7 @@ model FlavorVariant {
     flavor       Flavor        @relation(fields: [flavorId], references: [id], onDelete: Cascade)
     size         String
     stock        Int
+    createdAt    DateTime      @default(now()) @map("created_at")
     packageItems PackageItem[]
 
     @@map("flavor_variants")

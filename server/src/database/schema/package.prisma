@@ -4,7 +4,9 @@ model Package {
     product         Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
     name            String
     price           Float
+    createdAt       DateTime      @default(now()) @map("created_at")
     cartItems       CartItem[]
+    orders          Order[]
     items           PackageItem[]
 
     @@map("packages")
