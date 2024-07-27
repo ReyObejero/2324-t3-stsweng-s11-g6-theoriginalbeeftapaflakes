@@ -8,6 +8,7 @@ model User {
     createdAt     DateTime       @default(now()) @map("created_at")
     cart          Cart?
     orders        Order[]
+    reviews       Review[]
     refreshTokens RefreshToken[]
 
     @@map("users")
