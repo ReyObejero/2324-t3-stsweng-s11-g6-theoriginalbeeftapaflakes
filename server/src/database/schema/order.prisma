@@ -8,6 +8,7 @@ model Order {
     package          Package     @relation(fields: [packageId], references: [id])
     status           OrderStatus @default(CONFIRMED)
     quantity         Int
+    price            Float
     createdAt        DateTime    @default(now()) @map("created_at")
     confirmedAt      DateTime?   @map("confirmed_at")
     packedAt         DateTime?   @map("packed_at")
