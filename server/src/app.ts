@@ -1,11 +1,21 @@
+import cookieParser from 'cookie-parser';
 import express from 'express';
-import { AUTH_ROUTER, USER_ROUTER } from './api/v1/routes';
-import { ERROR_HANDLER } from './api/v1/middlewares';
+import createError from 'http-errors';
+import { errorMessages, statusCodes } from './constants';
+import { errorHandler } from './middlewares';
+import { authRouter, cartRouter, productRouter, userRouter } from './routes';
 
-const APP = express();
-APP.use(express.json());
-APP.use('/api/v1', AUTH_ROUTER);
-APP.use('/api/v1', USER_ROUTER);
-APP.use(ERROR_HANDLER);
+const app = express();
 
-export { APP };
+app.use(cookieParser());
+app.use(express.json());
+
+app.use('/api/auth', authRouter);
+app.use('/api/carts', cartRouter);
+app.use('/api/products', productRouter);
+app.use('/api/users', userRouter);
+
+app.use((req, res, next) => next(createError(statusCodes.clientError.NOT_FOUND, errorMessages.RESOURCE_NOT_FOUND)));
+app.use(errorHandler);
+
+export { app };

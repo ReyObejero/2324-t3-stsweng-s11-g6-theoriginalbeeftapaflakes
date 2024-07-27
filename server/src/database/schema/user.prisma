@@ -1,0 +1,21 @@
+model User {
+    id            Int            @id @default(autoincrement())
+    username      String         @unique
+    email         String         @unique
+    password      String
+    address       String?
+    role          UserRole       @default(USER)
+    createdAt     DateTime       @default(now()) @map("created_at")
+    cart          Cart?
+    orders        Order[]
+    refreshTokens RefreshToken[]
+
+    @@map("users")
+}
+
+enum UserRole {
+    USER
+    ADMIN
+
+    @@map("user_role")
+}
