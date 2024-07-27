@@ -5,11 +5,9 @@ import { env } from '@/config';
 import { errorMessages, statusCodes } from '@/constants';
 
 /**
- * Middleware to verify the JWT access token in the authorization header.
- *
- * @remarks
- * This middleware expects the authorization header to contain a Bearer token. If the token is valid, it passes control
- * to the next middleware function; otherwise, it throws an appropriate HTTP error.
+ * Middleware function to authenticate the user with the JWT access token in the HTTP cookies. It verifies the token and
+ * extracts the payload, which is then attached to the `req` object under the `jwtPayload` property. If the token is not
+ * found or is invalid, control is passed to the `next` function with an appropriate error.
  *
  * @example
  * ```
@@ -54,6 +52,13 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
     );
 };
 
+/**
+ * Middleware function to protect routes against non-admin access with the `role` property in `req.jwtPayload`.
+ *
+ * @param req - The request object
+ * @param res - The response object
+ * @param next - The next function
+ */
 export const protect = (req: Request, res: Response, next: NextFunction): void => {
     if (req.jwtPayload?.role !== 'ADMIN') {
         next(createError(statusCodes.clientError.FORBIDDEN, errorMessages.ACCESS_DENIED));

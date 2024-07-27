@@ -1,11 +1,11 @@
 model Order {
     id               Int         @id @default(autoincrement())
     userId           Int         @map("user_id")
-    user             User        @relation(fields: [userId], references: [id])
+    user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
     productId        Int         @map("productId")
-    product          Product     @relation(fields: [productId], references: [id])
+    product          Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
     packageId        Int         @map("package_id")
-    package          Package     @relation(fields: [packageId], references: [id])
+    package          Package     @relation(fields: [packageId], references: [id], onDelete: Cascade)
     status           OrderStatus @default(CONFIRMED)
     quantity         Int
     price            Float

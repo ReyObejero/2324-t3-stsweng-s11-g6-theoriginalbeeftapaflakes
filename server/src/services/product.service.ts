@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client';
 import createError from 'http-errors';
 import { errorMessages, statusCodes } from '@/constants';
 import { prismaClient } from '@/database';
+import { reviewService } from './review.service';
 
 export type DetailedProduct = Prisma.ProductGetPayload<{
     include: {
@@ -28,6 +29,32 @@ export type DetailedPackage = Prisma.PackageGetPayload<{
         };
     };
 }>;
+
+const detailedProductQueryArgs = {
+    include: {
+        packages: {
+            include: {
+                items: {
+                    include: {
+                        flavor: true,
+                        flavorVariant: true,
+                    },
+                },
+            },
+        },
+    },
+};
+
+const detailedPackageQueryArgs = {
+    include: {
+        items: {
+            include: {
+                flavor: true,
+                flavorVariant: true,
+            },
+        },
+    },
+};
 
 export const productService = {
     deletePackage: async (productId: number, packageId: number): Promise<DetailedPackage> => {
@@ -96,14 +123,7 @@ export const productService = {
 
         return await prismaClient.package.findUnique({
             where: { id: packageId },
-            include: {
-                items: {
-                    include: {
-                        flavor: true,
-                        flavorVariant: true,
-                    },
-                },
-            },
+            ...detailedPackageQueryArgs,
         });
     },
 
@@ -114,14 +134,7 @@ export const productService = {
 
         return await prismaClient.package.findMany({
             where: { productId },
-            include: {
-                items: {
-                    include: {
-                        flavor: true,
-                        flavorVariant: true,
-                    },
-                },
-            },
+            ...detailedPackageQueryArgs,
         });
     },
 
@@ -132,35 +145,30 @@ export const productService = {
 
         return await prismaClient.product.findUnique({
             where: { id: productId },
-            include: {
-                packages: {
-                    include: {
-                        items: {
-                            include: {
-                                flavor: true,
-                                flavorVariant: true,
-                            },
-                        },
-                    },
-                },
-            },
+            ...detailedProductQueryArgs,
         });
     },
 
     getProducts: async (): Promise<DetailedProduct[]> => {
         return await prismaClient.product.findMany({
-            include: {
-                packages: {
-                    include: {
-                        items: {
-                            include: {
-                                flavor: true,
-                                flavorVariant: true,
-                            },
-                        },
-                    },
-                },
-            },
+            ...detailedProductQueryArgs,
+        });
+    },
+
+    updateProductAverageRating: async (productId: number): Promise<DetailedProduct> => {
+        if (!productId || !(await productService.getProduct(productId))) {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.PRODUCT_ID_INVALID);
+        }
+
+        const reviews = await reviewService.getReviews();
+        const sumRatings = reviews.reduce((accumulator, currentReview) => {
+            return (accumulator += currentReview.rating);
+        }, 0);
+
+        return await prismaClient.product.update({
+            where: { id: productId },
+            data: { averageRating: sumRatings / reviews.length },
+            ...detailedProductQueryArgs,
         });
     },
 };
