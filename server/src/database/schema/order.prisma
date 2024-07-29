@@ -6,7 +6,8 @@ model Order {
     product          Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
     packageId        Int         @map("package_id")
     package          Package     @relation(fields: [packageId], references: [id], onDelete: Cascade)
-    status           OrderStatus @default(CONFIRMED)
+    payPalOrderId    String?        @unique
+    status           OrderStatus @default(PROCESSING)
     quantity         Int
     price            Float
     createdAt        DateTime    @default(now()) @map("created_at")
@@ -21,6 +22,7 @@ model Order {
 }
 
 enum OrderStatus {
+    PROCESSING
     CONFIRMED
     PACKED
     SHIPPED

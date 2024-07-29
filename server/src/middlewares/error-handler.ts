@@ -27,7 +27,7 @@ export const errorHandler = (err: HttpError, req: Request, res: Response, next: 
 
     const statusCode = err.statusCode || statusCodes.serverError.INTERNAL_SERVER_ERROR;
     const errorMessage = err.message || errorMessages.INTERNAL_SERVER_ERROR;
-    const errorPayload = { message: errorMessage, ...(err.errors && { errors: err.errors }) };
+    const errorPayload = { error: { message: errorMessage, ...(err.errors && { errors: err.errors }) } };
 
     return sendResponse(res, statusCode, errorPayload);
 };
