@@ -98,8 +98,12 @@ export const orderService = {
         return prismaClient.order.findUnique({ where: { id: orderId }, ...detailedOrderQueryArgs });
     },
 
+    getOrders: async (): Promise<DetailedOrder[]> => {
+        return await prismaClient.order.findMany(detailedOrderQueryArgs);
+    },
+
     getOrdersByUserId: async (userId: number): Promise<DetailedOrder[]> => {
-        if (!userId) {
+        if (!userId || !(await userService.getUserById(userId))) {
             throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USER_ID_INVALID);
         }
 
