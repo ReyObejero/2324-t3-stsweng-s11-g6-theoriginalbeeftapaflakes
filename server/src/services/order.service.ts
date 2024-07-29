@@ -23,23 +23,6 @@ const detailedOrderQueryArgs = {
     },
 };
 
-const isValidExpiryDate = (date: string): boolean => {
-    if (!/^\d{4}-\d{2}$/.test(date)) {
-        return false;
-    }
-
-    const [year, month] = date.split('-').map(Number);
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth() + 1;
-
-    if (year < currentYear || (year === currentYear && month < currentMonth)) {
-        return false;
-    }
-
-    return true;
-};
-
 export const orderService = {
     createOrder: async (
         userId: number,
@@ -113,6 +96,14 @@ export const orderService = {
         }
 
         return prismaClient.order.findUnique({ where: { id: orderId }, ...detailedOrderQueryArgs });
+    },
+
+    getOrdersByUserId: async (userId: number): Promise<DetailedOrder[]> => {
+        if (!userId) {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USER_ID_INVALID);
+        }
+
+        return await prismaClient.order.findMany({ where: { userId }, ...detailedOrderQueryArgs });
     },
 
     updateOrderStatus: async (

@@ -4,6 +4,12 @@ import { asyncRequestHandlerWrapper, sendResponse } from '@/utils';
 import { orderService } from '@/services';
 
 export const orderController = {
+    getAuthenticatedUserOrders: asyncRequestHandlerWrapper(async (req: Request, res: Response): Promise<void> => {
+        const orders = await orderService.getOrdersByUserId(req!.jwtPayload!.userId);
+
+        return sendResponse(res, statusCodes.successful.OK, { data: { items: orders } });
+    }),
+
     createOrder: asyncRequestHandlerWrapper(async (req: Request, res: Response): Promise<void> => {
         const {
             productId,
