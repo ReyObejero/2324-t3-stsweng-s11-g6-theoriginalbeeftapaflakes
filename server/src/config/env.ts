@@ -26,6 +26,12 @@ const envSchema = z.object({
         API_KEY: z.string(),
         API_SECRET: z.string(),
     }),
+    paypal: z.object({
+        SANDBOX_BASE_URL: z.string(),
+        LIVE_BASE_URL: z.string(),
+        CLIENT_ID: z.string(),
+        CLIENT_SECRET: z.string(),
+    }),
 });
 
 export const env = envSchema.parse({
@@ -46,5 +52,11 @@ export const env = envSchema.parse({
         CLOUD_NAME: process.env.CLOUD_NAME,
         API_KEY: process.env.API_KEY,
         API_SECRET: process.env.API_SECRET,
+    },
+    paypal: {
+        SANDBOX_BASE_URL: process.env.SANDBOX_BASE_URL,
+        LIVE_BASE_URL: process.env.LIVE_BASE_URL,
+        CLIENT_ID: process.env.CLIENT_ID,
+        CLIENT_SECRET: process.env.CLIENT_SECRET,
     },
 });
