@@ -5,12 +5,7 @@ import { deleteCartItemSchema, createCartItemSchema, updateCartItemSchema } from
 
 const cartRouter = Router();
 
-cartRouter.post(
-    '/items/:productId/:packageId',
-    authenticate,
-    validate(createCartItemSchema),
-    cartController.createCartItem,
-);
+cartRouter.post('/items', authenticate, validate(createCartItemSchema), cartController.createCartItem);
 cartRouter.get('/', cartController.getCarts);
 cartRouter.get('/me', authenticate, cartController.getAuthenticatedUserCart);
 cartRouter.put('/items/:cartItemId', authenticate, validate(updateCartItemSchema), cartController.updateCartItem);
