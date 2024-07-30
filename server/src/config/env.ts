@@ -13,6 +13,10 @@ const envSchema = z.object({
         PORT: z.coerce.number().default(3000),
         HOSTNAME: z.string().default('localhost'),
     }),
+    database: z.object({
+        DATABASE_URL: z.string(),
+        DIRECT_URL: z.string(),
+    }),
     jwt: z.object({
         ACCESS_TOKEN_SECRET: z.string(),
         ACCESS_TOKEN_EXPIRE_TIME: z.string(),
@@ -39,6 +43,10 @@ export const env = envSchema.parse({
     server: {
         PORT: process.env.PORT,
         HOSTNAME: process.env.HOSTNAME,
+    },
+    database: {
+        DATABASE_URL: process.env.DATABASE_URL,
+        DIRECT_URL: process.env.DIRECT_URL,
     },
     jwt: {
         ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET,
