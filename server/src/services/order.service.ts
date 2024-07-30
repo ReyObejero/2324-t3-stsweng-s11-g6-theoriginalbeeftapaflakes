@@ -32,8 +32,17 @@ export const orderService = {
         price: number,
         creditCard: unknown,
     ): Promise<DetailedOrder> => {
-        if (!userId || !(await userService.getUserById(userId))) {
+        if (!userId) {
             throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USER_ID_INVALID);
+        }
+
+        const user = await userService.getUserById(userId);
+        if (!user) {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USER_ID_INVALID);
+        }
+
+        if (!user.address) {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USER_ADDRESS_INVALID);
         }
 
         if (!productId || !(await productService.getProduct(productId))) {

@@ -35,6 +35,7 @@ export const errorMessages = {
     STATIC_PAGE_TITLE_INVALID: 'Static page title is invalid.',
     TOKEN_NOT_FOUND: 'Token not found.',
     TOKEN_INVALID: 'Token is invalid.',
+    USER_ADDRESS_INVALID: 'User address is invalid.',
     USER_CART_ALREADY_EMPTY: 'User cart is already empty.',
     USER_DELETE_REVIEW_DENIED: 'User does not have permission to delete this review.',
     USER_ID_INVALID: 'User ID is invalid.',
