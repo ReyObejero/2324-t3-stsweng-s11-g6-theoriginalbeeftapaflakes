@@ -5,11 +5,11 @@ import { asyncRequestHandlerWrapper, sendResponse } from '@/utils';
 
 export const cartController = {
     createCartItem: asyncRequestHandlerWrapper(async (req: Request, res: Response): Promise<void> => {
-        const { productId, packageId } = req.params;
+        const { productId, packageId } = req.body;
         const cartItem = await cartService.createCartItem(
             req!.jwtPayload!.userId,
-            Number(productId),
-            Number(packageId),
+            productId,
+            packageId,
             req.body.quantity,
         );
 
