@@ -5,6 +5,7 @@ import { authRouter } from './auth.router';
 import { cartRouter } from './cart.router';
 import { orderRouter } from './order.router';
 import { productRouter } from './product.router';
+import { reportRouter } from './report.router';
 import { reviewRouter } from './review.router';
 import { staticPageRouter } from './static-page.router';
 import { userRouter } from './user.router';
@@ -14,6 +15,7 @@ export const mountRoutes = (app: Application): void => {
     app.use('/carts', cartRouter);
     app.use('/orders', orderRouter);
     app.use('/products', productRouter);
+    app.use('/reports', reportRouter);
     app.use('/reviews', reviewRouter);
     app.use('/static-pages', staticPageRouter);
     app.use('/users', userRouter);
