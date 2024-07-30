@@ -85,7 +85,7 @@ export const orderService = {
             throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.PAYMENT_FAILED);
         }
 
-        await orderService.updateOrderStatus(order.id, 'CONFIRMED', new Date());
+        await orderService.updateOrderStatus(userId, order.id, 'CONFIRMED', new Date());
 
         return await orderService.updatePayPalOrderId(order.id, data.id);
     },
@@ -111,20 +111,34 @@ export const orderService = {
     },
 
     updateOrderStatus: async (
+        userId: number,
         orderId: number,
         updatedStatus: OrderStatus,
         updatedDate: Date,
     ): Promise<DetailedOrder> => {
+        if (!userId) {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USER_ID_INVALID);
+        }
+
+        const user = await userService.getUserById(userId);
+        if (!user) {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USER_ID_INVALID);
+        }
+
         if (!orderId || !(await orderService.getOrder(orderId))) {
             throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.ORDER_ID_INVALID);
         }
 
         if (!updatedStatus || !Object.values(OrderStatus).includes(updatedStatus) || updatedStatus === 'PROCESSING') {
-            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.ORDER_STATUS);
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.ORDER_STATUS_INVALID);
         }
 
         if (!updatedDate) {
             throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.DATE_INVALID);
+        }
+
+        if (user.role !== 'ADMIN' && updatedStatus !== 'DELIVERED' && updatedStatus !== 'CANCELLED') {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.ORDER_STATUS_UPDATE_DENIED);
         }
 
         const statusDateFields: Record<string, string> = {

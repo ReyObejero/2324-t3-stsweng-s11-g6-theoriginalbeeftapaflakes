@@ -35,4 +35,15 @@ export const orderController = {
 
         return sendResponse(res, statusCodes.successful.OK, { data: { items: orders } });
     }),
+
+    updateOrderStatus: asyncRequestHandlerWrapper(async (req: Request, res: Response): Promise<void> => {
+        const order = await orderService.updateOrderStatus(
+            req!.jwtPayload!.userId,
+            Number(req.params.orderId),
+            req.body.updatedStatus,
+            new Date(),
+        );
+
+        return sendResponse(res, statusCodes.successful.OK, { data: order });
+    }),
 };

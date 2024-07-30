@@ -1,3 +1,4 @@
+import { OrderStatus } from '@prisma/client';
 import { z } from 'zod';
 import { errorMessages } from '@/constants';
 
@@ -11,5 +12,17 @@ export const createOrderSchema = z.object({
         cardExpirationYear: z.string({ message: errorMessages.CARD_EXPIRATION_DATE_INVALID }),
         cardExpirationMonth: z.string({ message: errorMessages.CARD_EXPIRATION_DATE_INVALID }),
         cardSecurityCode: z.string({ message: errorMessages.CARD_SECURITY_CODE_INVALID }),
+    }),
+});
+
+export const updateOrderStatusSchema = z.object({
+    params: z.object({
+        orderId: z
+            .string()
+            .transform((orderId) => Number(orderId))
+            .refine((orderId) => !isNaN(orderId), { message: errorMessages.ORDER_ID_INVALID }),
+    }),
+    body: z.object({
+        updatedStatus: z.nativeEnum(OrderStatus, { message: errorMessages.ORDER_STATUS_INVALID }),
     }),
 });
