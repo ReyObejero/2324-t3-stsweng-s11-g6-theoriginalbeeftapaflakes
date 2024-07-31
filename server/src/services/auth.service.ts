@@ -1,4 +1,4 @@
-import { type User } from '@prisma/client';
+import { type User, type UserRole } from '@prisma/client';
 import { hash, verify } from 'argon2';
 import createError from 'http-errors';
 import { errorMessages, statusCodes } from '@/constants';
@@ -19,6 +19,40 @@ interface RegisterInput {
 }
 
 export const authService = {
+    register: async (input: RegisterInput, role?: UserRole): Promise<User> => {
+        const { username, email, password } = input;
+
+        if (!username) {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USERNAME_INVALID);
+        }
+
+        if (!email) {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.EMAIL_INVALID);
+        }
+
+        if (!password) {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USERNAME_INVALID);
+        }
+
+        if (await userService.getUserByUsername(username)) {
+            throw createError(statusCodes.clientError.CONFLICT, errorMessages.USERNAME_ALREADY_IN_USE);
+        }
+
+        if (await userService.getUserByEmail(email)) {
+            throw createError(statusCodes.clientError.CONFLICT, errorMessages.EMAIL_ALREADY_IN_USE);
+        }
+
+        return await prismaClient.user.create({
+            data: {
+                username,
+                email,
+                password: await hash(password),
+                profilePhotoUrl: 'https://asset.cloudinary.com/dqfjotjba/387e2481f384f9748dd285b3d059c92c',
+                ...(role && role !== 'USER' && { role }),
+            },
+        });
+    },
+
     login: async (
         input: LoginInput,
         refreshToken: string,
@@ -62,36 +96,18 @@ export const authService = {
         };
     },
 
-    register: async (input: RegisterInput): Promise<User> => {
-        const { username, email, password } = input;
-
-        if (!username) {
-            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USERNAME_INVALID);
+    logout: async (userId: number): Promise<User> => {
+        if (!userId) {
+            throw createError(statusCodes.clientError.NOT_FOUND, errorMessages.USER_ID_INVALID);
         }
 
-        if (!email) {
-            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.EMAIL_INVALID);
+        const user = await userService.getUserById(userId);
+        if (!user) {
+            throw createError(statusCodes.clientError.NOT_FOUND, errorMessages.USER_ID_INVALID);
         }
 
-        if (!password) {
-            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USERNAME_INVALID);
-        }
+        await tokenService.deleteRefreshTokensByUserId(userId);
 
-        if (await userService.getUserByUsername(username)) {
-            throw createError(statusCodes.clientError.CONFLICT, errorMessages.USERNAME_ALREADY_IN_USE);
-        }
-
-        if (await userService.getUserByEmail(email)) {
-            throw createError(statusCodes.clientError.CONFLICT, errorMessages.EMAIL_ALREADY_IN_USE);
-        }
-
-        return await prismaClient.user.create({
-            data: {
-                username,
-                email,
-                password: await hash(password),
-                profilePhotoUrl: 'https://asset.cloudinary.com/dqfjotjba/387e2481f384f9748dd285b3d059c92c',
-            },
-        });
+        return user;
     },
 };

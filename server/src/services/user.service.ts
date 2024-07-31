@@ -39,7 +39,7 @@ export const userService = {
     },
 
     updateUserAddress: async (username: string, address: string): Promise<User> => {
-        if (!(await userService.getUserByUsername(username))) {
+        if (!username || !(await userService.getUserByUsername(username))) {
             throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USERNAME_INVALID);
         }
 
