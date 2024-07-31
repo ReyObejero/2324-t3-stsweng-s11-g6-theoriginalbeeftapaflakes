@@ -37,4 +37,16 @@ export const userService = {
     getUsers: async (): Promise<User[]> => {
         return await prismaClient.user.findMany();
     },
+
+    updateUserAddress: async (username: string, address: string): Promise<User> => {
+        if (!(await userService.getUserByUsername(username))) {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USERNAME_INVALID);
+        }
+
+        if (!address) {
+            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USER_ADDRESS_INVALID);
+        }
+
+        return await prismaClient.user.update({ where: { username }, data: { address } });
+    },
 };
