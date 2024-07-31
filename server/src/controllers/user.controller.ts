@@ -23,4 +23,13 @@ export const userController = {
             data: { items: users },
         });
     }),
+
+    updateUser: asyncRequestHandlerWrapper(async (req: Request, res: Response): Promise<void> => {
+        const { address } = req.body;
+        const user = await userService.updateUserAddress(req.params.username, address);
+
+        return sendResponse(res, statusCodes.successful.OK, {
+            data: user,
+        });
+    }),
 };

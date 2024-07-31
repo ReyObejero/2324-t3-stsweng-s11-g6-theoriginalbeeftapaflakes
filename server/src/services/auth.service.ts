@@ -86,7 +86,12 @@ export const authService = {
         }
 
         return await prismaClient.user.create({
-            data: { username, email, password: await hash(password) },
+            data: {
+                username,
+                email,
+                password: await hash(password),
+                profilePhotoUrl: 'https://asset.cloudinary.com/dqfjotjba/387e2481f384f9748dd285b3d059c92c',
+            },
         });
     },
 };
