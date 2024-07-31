@@ -62,7 +62,7 @@ export const authService = {
         };
     },
 
-    register: async (input: RegisterInput): Promise<User> => {
+    register: async (input: RegisterInput, isAdmin: boolean): Promise<User> => {
         const { username, email, password } = input;
 
         if (!username) {
@@ -91,6 +91,7 @@ export const authService = {
                 email,
                 password: await hash(password),
                 profilePhotoUrl: 'https://asset.cloudinary.com/dqfjotjba/387e2481f384f9748dd285b3d059c92c',
+                ...(isAdmin && { role: 'ADMIN' }),
             },
         });
     },

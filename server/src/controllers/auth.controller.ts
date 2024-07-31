@@ -32,7 +32,7 @@ export const authController = {
     }),
 
     register: asyncRequestHandlerWrapper(async (req: Request, res: Response): Promise<void> => {
-        const user = await authService.register(req.body);
+        const user = await authService.register(req.body, req.jwtPayload?.role === 'ADMIN' ? true : false);
 
         return sendResponse(res, statusCodes.successful.CREATED, { data: user });
     }),
