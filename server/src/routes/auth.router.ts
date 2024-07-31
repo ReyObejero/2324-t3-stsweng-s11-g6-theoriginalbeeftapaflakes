@@ -7,6 +7,7 @@ const authRouter = Router();
 
 authRouter.post('/login', validate(loginSchema), authController.login);
 authRouter.post('/register', validate(registerSchema), authController.register);
-authRouter.post('/register/admin', validate(registerSchema), protect, authController.register);
+authRouter.post('/register/admin', authenticate, protect, validate(registerSchema), authController.register);
+authRouter.delete('/logout', authenticate, authController.logout);
 
 export { authRouter };
