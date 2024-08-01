@@ -6,5 +6,5 @@
             "use": "@vercel/node"
         }
     ],
-    "output": "build"
+    "outputDirectory": "build"
 }
