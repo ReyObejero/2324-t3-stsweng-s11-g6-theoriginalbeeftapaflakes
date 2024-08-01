@@ -7,9 +7,12 @@ export const cartController = {
     createCartItem: asyncRequestHandlerWrapper(async (req: Request, res: Response): Promise<void> => {
         const { productId, packageId } = req.body;
         const cartItem = await cartService.createCartItem(
+    
             req!.jwtPayload!.userId,
             productId,
             packageId,
+
+
             req.body.quantity,
         );
 
@@ -17,7 +20,7 @@ export const cartController = {
     }),
 
     getAuthenticatedUserCart: asyncRequestHandlerWrapper(async (req: Request, res: Response): Promise<void> => {
-        const cart = await cartService.getCartByUserId(req!.jwtPayload!.userId);
+        const cart = await cartService.getCartByUserId(Number(req!.jwtPayload!.userId));
 
         return sendResponse(res, statusCodes.successful.OK, { data: cart });
     }),
@@ -46,3 +49,4 @@ export const cartController = {
         return sendResponse(res, statusCodes.successful.OK, { data: { items: carts } });
     }),
 };
+

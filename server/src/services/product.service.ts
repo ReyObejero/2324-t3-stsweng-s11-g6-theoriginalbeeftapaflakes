@@ -30,7 +30,7 @@ export type DetailedPackage = Prisma.PackageGetPayload<{
     };
 }>;
 
-const detailedProductQueryArgs = {
+export const detailedProductQueryArgs = {
     include: {
         packages: {
             include: {
@@ -45,7 +45,7 @@ const detailedProductQueryArgs = {
     },
 };
 
-const detailedPackageQueryArgs = {
+export const detailedPackageQueryArgs = {
     include: {
         items: {
             include: {
