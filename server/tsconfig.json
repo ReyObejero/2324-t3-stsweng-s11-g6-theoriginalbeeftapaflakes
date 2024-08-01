@@ -5,6 +5,7 @@
         "rootDir": "./src",
         "typeRoots": ["./src/types", "./node_modules/@types"],
         "moduleResolution": "node10",
+        "baseUrl": "./",
         "paths": {
             "@/*": ["./src/*"]
         },
