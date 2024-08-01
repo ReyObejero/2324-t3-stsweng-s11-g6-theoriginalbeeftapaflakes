@@ -4,7 +4,7 @@
     "description": "",
     "main": "./build/index.js",
     "scripts": {
-        "build": "tsc && tsc-alias",
+        "build": "tsc && tsc-alias && prisma generate",
         "start:dev": "cross-env NODE_ENV=\"development\" nodemon --watch \"./src/**\" --ext \"ts,json\" --ignore \"./src/**/*.spec.ts\" --exec \"ts-node src/index.ts\"",
         "prisma:push": "dotenv -e .env.development -- npx prisma db push",
         "prisma:seed:product": "dotenv -e .env.development -- npx ts-node src/database/seed/product.seed.ts"
