@@ -15,7 +15,7 @@ exports.app = app;
 app.use((0, cookie_parser_1.default)());
 console.log(config_1.env.cors.CORS_ORIGIN);
 app.use((0, cors_1.default)({
-    origin: config_1.env.cors.CORS_ORIGIN,
+    origin: process.env.CORS_ORIGIN,
     credentials: true,
 }));
 app.use(express_1.default.json());

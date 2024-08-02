@@ -10,7 +10,7 @@ app.use(cookieParser());
 console.log(env.cors.CORS_ORIGIN);
 app.use(
     cors({
-        origin: env.cors.CORS_ORIGIN,
+        origin: process.env.CORS_ORIGIN,
         credentials: true,
     }),
 );

@@ -21,7 +21,6 @@ exports.authController = {
         return (0, utils_1.sendResponse)(res, constants_1.statusCodes.successful.CREATED, { data: user });
     })),
     login: (0, utils_1.asyncRequestHandlerWrapper)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        console.log(config_1.env.cors.CORS_ORIGIN);
         const { accessToken, refreshToken, user } = yield services_1.authService.login(req.body, req.cookies[config_1.env.jwt.REFRESH_TOKEN_COOKIE_NAME]);
         const cookieOptions = {
             httpOnly: true,

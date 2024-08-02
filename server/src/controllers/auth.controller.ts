@@ -12,7 +12,6 @@ export const authController = {
     }),
 
     login: asyncRequestHandlerWrapper(async (req: Request, res: Response): Promise<void> => {
-        console.log(env.cors.CORS_ORIGIN);
         const { accessToken, refreshToken, user } = await authService.login(
             req.body,
             req.cookies[env.jwt.REFRESH_TOKEN_COOKIE_NAME],
