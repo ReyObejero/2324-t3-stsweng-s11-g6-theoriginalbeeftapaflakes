@@ -13,6 +13,9 @@ const envSchema = z.object({
         PORT: z.coerce.number().default(3000),
         HOSTNAME: z.string().default('localhost'),
     }),
+    cors: z.object({
+        CORS_ORIGIN: z.string(),
+    }),
     database: z.object({
         DATABASE_URL: z.string(),
         DIRECT_URL: z.string(),
@@ -43,6 +46,9 @@ export const env = envSchema.parse({
     server: {
         PORT: process.env.PORT,
         HOSTNAME: process.env.HOSTNAME,
+    },
+    cors: {
+        CORS_ORIGIN: process.env.CORS_ORIGIN,
     },
     database: {
         DATABASE_URL: process.env.DATABASE_URL,
