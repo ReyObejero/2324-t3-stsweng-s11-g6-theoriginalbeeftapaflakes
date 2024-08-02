@@ -19,7 +19,7 @@ export const authController = {
 
         const cookieOptions: CookieOptions = {
             httpOnly: true,
-            sameSite: 'none',
+            sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
             secure: env.NODE_ENV === 'production',
         };
 
