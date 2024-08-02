@@ -23,6 +23,8 @@ export const authController = {
             secure: env.NODE_ENV === 'production',
         };
 
+        console.log(env.cors.CORS_ORIGIN);
+
         res.clearCookie(env.jwt.ACCESS_TOKEN_COOKIE_NAME);
         res.cookie(env.jwt.ACCESS_TOKEN_COOKIE_NAME, accessToken, {
             ...cookieOptions,
