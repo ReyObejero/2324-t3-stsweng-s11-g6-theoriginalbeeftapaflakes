@@ -15,11 +15,5 @@
                 "Access-Control-Allow-Origin": "http://localhost:3000"
             }
         }
-    ],
-    "headers": [
-        {
-            "source": "/(.*)",
-            "headers": [{ "key": "Access-Control-Allow-Origin", "value": "http://localhost:3000" }]
-        }
     ]
 }
