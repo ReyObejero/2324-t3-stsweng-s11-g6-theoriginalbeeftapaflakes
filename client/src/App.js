@@ -16,6 +16,7 @@ import AdminDashboard from './Components/Views/Admin/Admin.jsx';
 import OrderManagement from './Components/Views/OrderManagement/OrderManagement_Views.jsx';
 import CheckoutandStatus from './Components/Views/CheckoutandStatus/CS.jsx';
 import { AuthProvider } from './providers';
+import { Protect } from './Components/Protect.jsx';
 
 function App() {
     return (
@@ -25,10 +26,10 @@ function App() {
                     <Navbar />
                     <Routes>
                         <Route path="/" element={<Home />} />
-                        <Route path="/products/:productId" element={<ProductPage />} />
+                        <Route path="/products/:productId" />
                         <Route path="/products" element={<Products category="list" />} />
                         <Route path="/about/*" element={<About />} />
-                        <Route path="/product-management" element={<AdminDashboard />} />
+                        <Route path="/product-management" element={<Protect element={<AdminDashboard />} />} />
                         <Route path="/order-management" element={<OrderManagement />} />
                         <Route path="/cart" element={<Cart />} />
                         <Route path="/productlist" element={<ProductList />} />
