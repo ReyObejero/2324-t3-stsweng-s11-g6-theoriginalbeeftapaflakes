@@ -14,36 +14,18 @@ const Login = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
-            const response = await axiosInstance.post(
-                `${AUTH_URL}/login`,
-                { username, password },
-                {
-                    withCredentials: true,
-                },
-            );
+            const response = await axiosInstance.post(`${AUTH_URL}/login`, { username, password });
+            setSuccessMessage('Login successful! Retrieving user information...');
 
-            if (response.status === 201) {
-                setSuccessMessage('Login successful! Retrieving user information...');
-
-                try {
-                    const userResponse = await axiosInstance.get(`${USERS_URL}/me`);
-
-                    if (userResponse.status === 200) {
-                        setTimeout(() => {
-                            navigate('/');
-                        }, 2000);
-                    } else {
-                        setLoginError('Failed to retrieve user information.');
-                        setSuccessMessage('');
-                    }
-                } catch (error) {
-                    setLoginError('Failed to retrieve user information.');
-                    setSuccessMessage('');
-                    console.error('Error retrieving user info:', error);
-                }
-            } else {
-                setLoginError('Login failed. Please check your credentials.');
+            try {
+                const userResponse = await axiosInstance.get(`${USERS_URL}/me`);
+                setTimeout(() => {
+                    navigate('/');
+                }, 2000);
+            } catch (error) {
+                setLoginError('Failed to retrieve user information.');
                 setSuccessMessage('');
+                console.error('Error retrieving user info:', error);
             }
         } catch (error) {
             setLoginError('Login failed. Please check your credentials.');
