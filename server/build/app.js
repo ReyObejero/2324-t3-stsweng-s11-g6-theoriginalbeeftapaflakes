@@ -12,11 +12,11 @@ const middlewares_1 = require("./middlewares");
 const routes_1 = require("./routes");
 const app = (0, express_1.default)();
 exports.app = app;
-app.use((0, cookie_parser_1.default)());
 app.use((0, cors_1.default)({
     origin: config_1.env.cors.CORS_ORIGIN,
     credentials: true,
 }));
+app.use((0, cookie_parser_1.default)());
 app.use(express_1.default.json());
 (0, routes_1.mountRoutes)(app);
 app.use(middlewares_1.errorHandler);

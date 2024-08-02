@@ -6,13 +6,13 @@ import { errorHandler } from './middlewares';
 import { mountRoutes } from './routes';
 
 const app = express();
-app.use(cookieParser());
 app.use(
     cors({
         origin: env.cors.CORS_ORIGIN,
         credentials: true,
     }),
 );
+app.use(cookieParser());
 app.use(express.json());
 mountRoutes(app);
 app.use(errorHandler);
