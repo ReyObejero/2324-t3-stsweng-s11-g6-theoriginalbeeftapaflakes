@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
 import { AUTH_URL, USERS_URL } from '../../API/constants.js';
+import { AuthContext } from '../../contexts';
 import axiosInstance from '../../API/axiosInstance.js';
 
 const Login = () => {
@@ -10,6 +11,7 @@ const Login = () => {
     const [loginError, setLoginError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const navigate = useNavigate();
+    const { setUser, setIsLoggedIn } = useContext(AuthContext);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -18,7 +20,10 @@ const Login = () => {
             setSuccessMessage('Login successful! Retrieving user information...');
 
             try {
-                const userResponse = await axiosInstance.get(`${USERS_URL}/me`);
+                const loggedInUser = (await axiosInstance.get(`${USERS_URL}/me`)).data.data;
+                setUser(loggedInUser);
+                setIsLoggedIn(true);
+
                 setTimeout(() => {
                     navigate('/');
                 }, 2000);
