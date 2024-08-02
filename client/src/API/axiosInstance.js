@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const instance = axios.create({
-    baseURL: `http://localhost:8080/`, // Backend Server URL
+    baseURL: `https://2324-t3-stsweng-s11-g6-theoriginalbeeftapaflakes-bpekbxjy5.vercel.app/`, // Backend Server URL
 });
 
 export default instance;

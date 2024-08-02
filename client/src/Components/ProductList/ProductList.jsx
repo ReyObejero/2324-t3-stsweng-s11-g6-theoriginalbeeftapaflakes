@@ -41,6 +41,7 @@ const ProductList = () => {
             try {
                 // Make a GET request to fetch products from the database
                 const response = await axiosInstance.get(PRODUCT_URL);
+                console.log(response);
                 // Set the products state with the fetched data
                 setProducts(response.data.data.items);
             } catch (error) {

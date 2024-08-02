@@ -3,20 +3,17 @@ import './ProductPage.css';
 import { Link } from 'react-router-dom';
 import { PRODUCT_URL, CARTS_URL } from '../../API/constants';
 import axiosInstance from '../../API/axiosInstance.js';
-import Cart from '../Views/Cart/Cart.jsx';
 
 const Product = () => {
-    // Scroll to top on mount
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
 
-    const [product, setProduct] = useState();
+    const [product, setProduct] = useState(null);
     const [selectedPackage, setSelectedPackage] = useState('');
     const [quantity, setQuantity] = useState(1);
     const [warningMessage, setWarningMessage] = useState('');
     const [showWarning, setShowWarning] = useState(false);
-    const [token, setToken] = useState(localStorage.getItem('jwt'));
     const [addedToCartMessage, setAddedToCartMessage] = useState('');
 
     useEffect(() => {
@@ -26,7 +23,6 @@ const Product = () => {
                 const response = await axiosInstance.get(`${PRODUCT_URL}/${productId}`, {
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: `Bearer ${localStorage.getItem('jwt')}`,
                     },
                 });
 
@@ -34,7 +30,8 @@ const Product = () => {
                     throw new Error(response.data.error || 'Failed to fetch product');
                 }
 
-                setProduct(response.data);
+                setProduct(response.data.data);
+                console.log(response.data.data); // Log the fetched product data
             } catch (error) {
                 console.error('Error fetching product:', error.message);
             }
@@ -43,64 +40,56 @@ const Product = () => {
         handleFetchProduct();
     }, []);
 
-    // Function to update the selected package
-    const handlePackageSelection = (productpackage) => {
-        setSelectedPackage((prevPackage) => (prevPackage === productpackage ? '' : productpackage));
+    const handlePackageSelection = (productPackageName) => {
+        setSelectedPackage((prevPackage) => (prevPackage === productPackageName ? '' : productPackageName));
         setShowWarning(false);
     };
 
-    // Function to get the price based on package
     const getPrice = (price) => {
-        const numericPrice = parseFloat(price.$numberDecimal);
+        const numericPrice = parseFloat(price);
         return numericPrice.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' });
     };
 
-    // Function to get the total bottles based on selected package
     const getTotalBottles = (pkgIndex) => {
-        if (pkgIndex === -1) return null;
+        if (pkgIndex === -1 || !product || !product.packages[pkgIndex]) return null;
         let total = 0;
-        product.packages[pkgIndex].bottlesPerFlavor.forEach((bottle) => {
-            total += bottle.quantity;
+        product.packages[pkgIndex].items.forEach((item) => {
+            total += item.quantity;
         });
         return `${total} Bottles/Box `;
     };
 
     const getProductSize = (pkgIndex) => {
-        if (pkgIndex === -1) return null;
-        const size = product.packages[pkgIndex].packageSize;
-        return `(${size} Grams)`;
+        if (pkgIndex === -1 || !product || !product.packages[pkgIndex] || !product.packages[pkgIndex].items[0]) return null;
+        const size = product.packages[pkgIndex].items[0].flavorVariant.size;
+        return `(${size})`;
     };
 
     const handleAddToCart = async () => {
         const productId = window.location.pathname.split('/').pop();
-        const packageData = product.packages.find((pkg) => pkg.packageOption === selectedPackage);
+        const packageData = product.packages.find((pkg) => pkg.name === selectedPackage);
         if (!selectedPackage) {
             setWarningMessage('Please select a package');
             setShowWarning(true);
         } else {
             setShowWarning(false); // Reset warning message
             try {
-                // Prepare the cart item data
                 const cartItem = {
                     productId: productId,
                     name: product.name,
                     selectedPackage: selectedPackage,
-                    size: packageData.packageSize,
+                    size: packageData.items[0].flavorVariant.size,
                     price: packageData.price,
                     quantity: quantity,
                 };
-                // Make a POST request to add the item to the cart
                 const response = await axiosInstance.post(`${CARTS_URL}/add`, cartItem, {
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`,
                     },
                 });
 
-                // Check if the request was successful
                 if (response.status === 201) {
                     setAddedToCartMessage(response.data.message);
-                    // Reset the message after 3 seconds
                     setTimeout(() => {
                         setAddedToCartMessage('');
                     }, 3000);
@@ -109,7 +98,6 @@ const Product = () => {
                 }
             } catch (error) {
                 console.error('Error adding product to cart:', error.message);
-                // Optionally, you can display an error message to the user
             }
         }
     };
@@ -126,46 +114,49 @@ const Product = () => {
             {product && (
                 <div className="p-details-container">
                     <div className="p-image-gallery">
-                        <img src={`https://tobtf.onrender.com/${product.image}`} alt={product.name} />
+                        <img src={product.imageUrl} alt={product.name} />
                     </div>
                     <div className="product-details">
                         <h1>{product.name}</h1>
                         <p className="p-amount">
                             {getTotalBottles(
-                                product.packages.findIndex((pkg) => pkg.packageOption === selectedPackage),
+                                product.packages ? product.packages.findIndex((pkg) => pkg.name === selectedPackage) : -1,
                             )}
-                            {getProductSize(product.packages.findIndex((pkg) => pkg.packageOption === selectedPackage))}
+                            {getProductSize(
+                                product.packages ? product.packages.findIndex((pkg) => pkg.name === selectedPackage) : -1,
+                            )}
                         </p>
                         <p className="p-price">
                             {selectedPackage
-                                ? getPrice(product.packages.find((pkg) => pkg.packageOption === selectedPackage).price)
+                                ? getPrice(product.packages.find((pkg) => pkg.name === selectedPackage).price)
                                 : 'Select a package'}
                         </p>
                         <div>
-                            {product.packages.map((productpackage, index) => (
+                            {product.packages && product.packages.map((productPackage, index) => (
                                 <button
                                     key={index}
-                                    onClick={() => handlePackageSelection(productpackage.packageOption)}
+                                    onClick={() => handlePackageSelection(productPackage.name)}
                                     className={
-                                        selectedPackage === productpackage.packageOption
+                                        selectedPackage === productPackage.name
                                             ? 'p-package-button selected'
                                             : 'p-package-button'
                                     }
                                 >
-                                    {productpackage.packageOption}
+                                    {productPackage.name}
                                 </button>
                             ))}
                         </div>
                         <ul>
-                            {product.packages
-                                .filter((pckg) => pckg.packageOption === selectedPackage)
-                                .flatMap((pckg) =>
-                                    pckg.bottlesPerFlavor.map((flavor, index) => (
-                                        <li key={index}>
-                                            {flavor.flavor}: {flavor.quantity}
-                                        </li>
-                                    )),
-                                )}
+                            {product.packages &&
+                                product.packages
+                                    .filter((pckg) => pckg.name === selectedPackage)
+                                    .flatMap((pckg) =>
+                                        pckg.items.map((item, index) => (
+                                            <li key={index}>
+                                                {item.flavor.name}: {item.quantity}
+                                            </li>
+                                        )),
+                                    )}
                         </ul>
                         {showWarning && <div className="p-error-bubble">{warningMessage}</div>}
                         <h3>Product Description:</h3>
@@ -185,17 +176,10 @@ const Product = () => {
                         </div>
                         <ul>
                             <li>Ingredients: {product.ingredients}</li>
-                            <li>Nutritional Info: {product.nutriInfo}</li>
                         </ul>
-                        {token ? (
-                            <button className="p-add-to-cart" onClick={handleAddToCart}>
-                                ADD TO CART
-                            </button>
-                        ) : (
-                            <Link to={'/login'}>
-                                <button className="p-add-to-cart">ADD TO CART</button>
-                            </Link>
-                        )}
+                        <button className="p-add-to-cart" onClick={handleAddToCart}>
+                            ADD TO CART
+                        </button>
                         {addedToCartMessage && <div className="p-success-message">{addedToCartMessage}</div>}
                     </div>
                 </div>

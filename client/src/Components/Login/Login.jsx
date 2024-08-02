@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
-import { AUTH_URL } from '../../API/constants.js';
+import { AUTH_URL, USERS_URL } from '../../API/constants.js';
 import axiosInstance from '../../API/axiosInstance.js';
 
 const Login = () => {
@@ -15,9 +15,34 @@ const Login = () => {
         event.preventDefault();
         try {
             const response = await axiosInstance.post(`${AUTH_URL}/login`, { username, password });
-            console.log(response);
+
+            if (response.status === 201) {
+                setSuccessMessage('Login successful! Retrieving user information...');
+
+                try {
+                    const userResponse = await axiosInstance.get(`${USERS_URL}/me`);
+
+                    if (userResponse.status === 200) {
+                        setTimeout(() => {
+                            navigate('/');
+                        }, 2000);
+                    } else {
+                        setLoginError('Failed to retrieve user information.');
+                        setSuccessMessage('');
+                    }
+                } catch (error) {
+                    setLoginError('Failed to retrieve user information.');
+                    setSuccessMessage('');
+                    console.error('Error retrieving user info:', error);
+                }
+            } else {
+                setLoginError('Login failed. Please check your credentials.');
+                setSuccessMessage('');
+            }
         } catch (error) {
-            console.log(error);
+            setLoginError('Login failed. Please check your credentials.');
+            setSuccessMessage('');
+            console.error('Error logging in:', error);
         }
     };
 
