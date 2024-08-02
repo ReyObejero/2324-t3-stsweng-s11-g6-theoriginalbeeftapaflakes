@@ -4,10 +4,9 @@
     "description": "",
     "main": "./build/index.js",
     "scripts": {
-        "build": "prisma:generate && rimraf build && tsc && tsc-alias",
-        "build:add": "git add build",
+        "build": "npm run prisma:generate && rimraf ./build && tsc && tsc-alias",
         "start:dev": "cross-env NODE_ENV=\"development\" nodemon --watch \"./src/**\" --ext \"ts,json\" --ignore \"./src/**/*.spec.ts\" --exec \"ts-node src/index.ts\"",
-        "prisma:generate": "prisma generate",
+        "prisma:generate": "dotenv -e .env.development -- prisma generate",
         "prisma:push": "dotenv -e .env.development -- npx prisma db push",
         "prisma:seed:product": "dotenv -e .env.development -- npx ts-node src/database/seed/product.seed.ts"
     },
@@ -49,7 +48,6 @@
         "schema": "./src/database/schema"
     },
     "pre-commit": [
-        "build",
-        "build:add"
+        "build"
     ]
 }
