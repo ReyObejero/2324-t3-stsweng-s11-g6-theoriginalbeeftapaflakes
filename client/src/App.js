@@ -26,7 +26,7 @@ function App() {
                     <Navbar />
                     <Routes>
                         <Route path="/" element={<Home />} />
-                        <Route path="/products/:productId" />
+                        <Route path="/products/:productId" element={<ProductPage />} />
                         <Route path="/products" element={<Products category="list" />} />
                         <Route path="/about/*" element={<About />} />
                         <Route path="/product-management" element={<Protect element={<AdminDashboard />} />} />
