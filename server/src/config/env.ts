@@ -2,6 +2,7 @@ import { config } from 'dotenv';
 import path from 'path';
 import { z } from 'zod';
 
+config();
 config({ path: path.resolve(__dirname, '../../.env') });
 config({
     path: path.resolve(__dirname, `../../.env.${process.env.NODE_ENV}`),

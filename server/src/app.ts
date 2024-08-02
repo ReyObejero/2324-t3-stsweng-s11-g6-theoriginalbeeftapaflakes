@@ -7,10 +7,9 @@ import { mountRoutes } from './routes';
 
 const app = express();
 app.use(cookieParser());
-console.log(env.cors.CORS_ORIGIN);
 app.use(
     cors({
-        origin: process.env.CORS_ORIGIN,
+        origin: env.cors.CORS_ORIGIN,
         credentials: true,
     }),
 );

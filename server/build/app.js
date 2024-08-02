@@ -13,9 +13,8 @@ const routes_1 = require("./routes");
 const app = (0, express_1.default)();
 exports.app = app;
 app.use((0, cookie_parser_1.default)());
-console.log(config_1.env.cors.CORS_ORIGIN);
 app.use((0, cors_1.default)({
-    origin: process.env.CORS_ORIGIN,
+    origin: config_1.env.cors.CORS_ORIGIN,
     credentials: true,
 }));
 app.use(express_1.default.json());
