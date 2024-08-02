@@ -20,18 +20,9 @@ const Product = () => {
         const handleFetchProduct = async () => {
             try {
                 const productId = window.location.pathname.split('/').pop();
-                const response = await axiosInstance.get(`${PRODUCT_URL}/${productId}`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                if (response.status !== 200) {
-                    throw new Error(response.data.error || 'Failed to fetch product');
-                }
-
+                const response = await axiosInstance.get(`${PRODUCT_URL}/${productId}`);
                 setProduct(response.data.data);
-                console.log(response.data.data); // Log the fetched product data
+                console.log('Product', response.data.data);
             } catch (error) {
                 console.error('Error fetching product:', error.message);
             }
@@ -60,13 +51,14 @@ const Product = () => {
     };
 
     const getProductSize = (pkgIndex) => {
-        if (pkgIndex === -1 || !product || !product.packages[pkgIndex] || !product.packages[pkgIndex].items[0]) return null;
+        if (pkgIndex === -1 || !product || !product.packages[pkgIndex] || !product.packages[pkgIndex].items[0])
+            return null;
         const size = product.packages[pkgIndex].items[0].flavorVariant.size;
         return `(${size})`;
     };
 
     const handleAddToCart = async () => {
-        const productId = window.location.pathname.split('/').pop();
+        const productId = parseInt(window.location.pathname.split('/').pop());
         const packageData = product.packages.find((pkg) => pkg.name === selectedPackage);
         if (!selectedPackage) {
             setWarningMessage('Please select a package');
@@ -76,28 +68,19 @@ const Product = () => {
             try {
                 const cartItem = {
                     productId: productId,
-                    name: product.name,
-                    selectedPackage: selectedPackage,
-                    size: packageData.items[0].flavorVariant.size,
-                    price: packageData.price,
+                    packageId: packageData.id,
                     quantity: quantity,
                 };
-                const response = await axiosInstance.post(`${CARTS_URL}/add`, cartItem, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                console.log('cartItem', cartItem);
+                const response = await axiosInstance.post(`${CARTS_URL}/items`, cartItem, {
+                    withCredentials: true,
                 });
-
-                if (response.status === 201) {
-                    setAddedToCartMessage(response.data.message);
-                    setTimeout(() => {
-                        setAddedToCartMessage('');
-                    }, 3000);
-                } else {
-                    throw new Error(response.data.error || 'Failed to add product to cart');
-                }
+                setAddedToCartMessage(response.data.message);
+                setTimeout(() => {
+                    setAddedToCartMessage('Added to cart.');
+                }, 3000);
             } catch (error) {
-                console.error('Error adding product to cart:', error.message);
+                console.log('Add to cart error', error);
             }
         }
     };
@@ -120,10 +103,14 @@ const Product = () => {
                         <h1>{product.name}</h1>
                         <p className="p-amount">
                             {getTotalBottles(
-                                product.packages ? product.packages.findIndex((pkg) => pkg.name === selectedPackage) : -1,
+                                product.packages
+                                    ? product.packages.findIndex((pkg) => pkg.name === selectedPackage)
+                                    : -1,
                             )}
                             {getProductSize(
-                                product.packages ? product.packages.findIndex((pkg) => pkg.name === selectedPackage) : -1,
+                                product.packages
+                                    ? product.packages.findIndex((pkg) => pkg.name === selectedPackage)
+                                    : -1,
                             )}
                         </p>
                         <p className="p-price">
@@ -132,19 +119,20 @@ const Product = () => {
                                 : 'Select a package'}
                         </p>
                         <div>
-                            {product.packages && product.packages.map((productPackage, index) => (
-                                <button
-                                    key={index}
-                                    onClick={() => handlePackageSelection(productPackage.name)}
-                                    className={
-                                        selectedPackage === productPackage.name
-                                            ? 'p-package-button selected'
-                                            : 'p-package-button'
-                                    }
-                                >
-                                    {productPackage.name}
-                                </button>
-                            ))}
+                            {product.packages &&
+                                product.packages.map((productPackage, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => handlePackageSelection(productPackage.name)}
+                                        className={
+                                            selectedPackage === productPackage.name
+                                                ? 'p-package-button selected'
+                                                : 'p-package-button'
+                                        }
+                                    >
+                                        {productPackage.name}
+                                    </button>
+                                ))}
                         </div>
                         <ul>
                             {product.packages &&
@@ -153,7 +141,7 @@ const Product = () => {
                                     .flatMap((pckg) =>
                                         pckg.items.map((item, index) => (
                                             <li key={index}>
-                                                {item.flavor.name}: {item.quantity}
+                                                {item.flavor.name} ({item.flavorVariant.size}): {item.quantity}
                                             </li>
                                         )),
                                     )}
