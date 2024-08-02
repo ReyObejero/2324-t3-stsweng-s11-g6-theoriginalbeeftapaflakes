@@ -20,6 +20,7 @@ const Featured = () => {
             try {
                 // Make a GET request to fetch products from the database
                 const response = await axiosInstance.get(PRODUCT_URL);
+                console.log(response);
                 // Set the products state with the fetched data
                 setProducts(response.data.data.items);
             } catch (error) {
@@ -37,7 +38,7 @@ const Featured = () => {
                 <div className={styles.features}>
                     {products.length > 0 ? (
                         products.map((product, index) => (
-                            <Fade delay={index * 150} key={product._id} triggerOnce={hasAnimated}>
+                            <Fade delay={index * 150} key={product.id} triggerOnce={hasAnimated}>
                                 <div
                                     className={`${styles.item} ${index % 2 === 0 ? styles.row : styles['row-reverse']} ${index === 1 ? styles['second-item'] : ''}`}
                                 >
