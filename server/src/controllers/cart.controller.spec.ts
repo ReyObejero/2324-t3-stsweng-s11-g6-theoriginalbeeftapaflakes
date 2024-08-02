@@ -2,13 +2,13 @@ import { Request, Response, NextFunction } from 'express';
 import { cartController } from '@/controllers/cart.controller';
 import { cartService } from '@/services';
 import { statusCodes } from '@/constants';
+import { sendResponse } from '@/utils/send-response';
 
 jest.mock('@/services/cart.service');
 jest.mock('@/utils/send-response', () => ({
     sendResponse: jest.fn()
 }));
 
-const sendResponse = require('@/utils/send-response').sendResponse;
 
 describe('Cart Controller', () => {
     let req: Partial<Request>;
@@ -38,8 +38,7 @@ describe('Cart Controller', () => {
     describe('createCartItem', () => {
         it('should create a cart item', async () => {
             const cartItem = { id: 1, productId: 1, packageId: 1, quantity: 1 };
-            req.params = { productId: '1', packageId: '1' };
-            req.body = { quantity: 1 };
+            req.body = { productId: '1', packageId: '1', quantity: 1 };
 
             (cartService.createCartItem as jest.Mock).mockResolvedValue(cartItem);
 

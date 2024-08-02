@@ -9,8 +9,8 @@ export const cartController = {
         const cartItem = await cartService.createCartItem(
     
             req!.jwtPayload!.userId,
-            productId,
-            packageId,
+            Number(productId),
+            Number(packageId),
 
 
             req.body.quantity,

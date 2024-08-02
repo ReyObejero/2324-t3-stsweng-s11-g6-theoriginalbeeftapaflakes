@@ -1,7 +1,7 @@
 import { type CookieOptions, type Request, type Response } from 'express';
 import { env } from '@/config';
 import { statusCodes } from '@/constants';
-import { authService, userService } from '@/services';
+import { authService} from '@/services';
 import { asyncRequestHandlerWrapper, sendResponse, timeStringToMilliseconds } from '@/utils';
 
 export const authController = {

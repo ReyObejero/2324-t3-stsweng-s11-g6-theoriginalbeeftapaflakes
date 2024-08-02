@@ -29,32 +29,6 @@ interface PayPalOrderResponse {
 }
 
 export const orderService = {
-<<<<<<< Updated upstream
-    createOrder: async (
-        userId: number,
-        productId: number,
-        packageId: number,
-        quantity: number,
-        price: number,
-        creditCard: unknown,
-    ): Promise<DetailedOrder> => {
-        if (!userId) {
-            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USER_ID_INVALID);
-        }
-
-        const user = await userService.getUserById(userId);
-        if (!user) {
-            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USER_ID_INVALID);
-        }
-
-        if (!user.address) {
-            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.USER_ADDRESS_INVALID);
-        }
-
-        if (!productId || !(await productService.getProduct(productId))) {
-            throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.PRODUCT_ID_INVALID);
-        }
-=======
   createOrder: async (
     userId: number,
     productId: number,
@@ -70,7 +44,6 @@ export const orderService = {
     if (!productId || !(await productService.getProduct(productId))) {
       throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.PRODUCT_ID_INVALID);
     }
->>>>>>> Stashed changes
 
     if (!packageId || !(await productService.getPackage(packageId))) {
       throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.PACKAGE_ID_INVALID);

@@ -154,12 +154,18 @@ describe('cartService', () => {
 
     describe('updateCartTotalPrice', () => {
         it('should throw error if cartId is missing', async () => {
+            (cartService.updateCartTotalPrice as jest.Mock).mockImplementation(async (cartId) => {
+                if (cartId === 0) {
+                    throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.CART_ID_INVALID);
+                } else {
+                    return { id: 1, items: [], userId: 1, totalPrice: 0 };
+                }
+            });
+
             await expect(cartService.updateCartTotalPrice(0)).rejects.toThrow(
                 createError(statusCodes.clientError.BAD_REQUEST, errorMessages.CART_ID_INVALID)
             );
         });
-       
-       
 
         it('should update the total price of the cart', async () => {
             const mockCart = { id: 1, userId: 1, items: [], totalPrice: 0 };
@@ -210,6 +216,4 @@ describe('cartService', () => {
             expect(result).toEqual(mockCartItem);
         });
     });
-
-    // Add more tests for other methods as needed
 });

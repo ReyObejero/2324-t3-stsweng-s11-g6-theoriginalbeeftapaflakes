@@ -3,84 +3,108 @@ import { authController } from '@/controllers/auth.controller';
 import { authService } from '@/services';
 import { env } from '@/config';
 import { statusCodes } from '@/constants';
-import { sendResponse} from '@/utils/send-response';
+import { sendResponse } from '@/utils/send-response';
 import { timeStringToMilliseconds } from '@/utils/parse-time';
 
 jest.mock('@/services/auth.service');
-jest.mock('@/utils/send-response', () => ({
-    sendResponse: jest.fn()
-}));
-jest.mock('@/utils/parse-time', () => ({
-    timeStringToMilliseconds: jest.fn().mockReturnValue(60000) // mock return value
-}));
+jest.mock('@/utils/send-response');
+jest.mock('@/utils/parse-time');
 
-
-
-describe('Auth Controller', () => {
+describe('authController', () => {
     let req: Partial<Request>;
     let res: Partial<Response>;
-    let next: NextFunction;
+    const mockUser = { id: 1, name: 'testUser' };
+    const mockAccessToken = 'mockAccessToken';
+    const mockRefreshToken = 'mockRefreshToken';
+    const mockAccessTokenExpireTime = '1h';
+    const mockRefreshTokenExpireTime = '7d';
 
     beforeEach(() => {
         req = {
-            body: {},
-            cookies: {} // Initialize cookies as an empty object
-        };
+            body: { username: 'test', password: 'password' },
+            cookies: { [env.jwt.REFRESH_TOKEN_COOKIE_NAME]: 'existingRefreshToken' },
+            jwtPayload: { userId: 1, role: 'USER' }
+        } as Partial<Request>; // Ensure req is typed as Partial<Request>
+
         res = {
+            cookie: jest.fn(),
+            clearCookie: jest.fn(),
             status: jest.fn().mockReturnThis(),
             json: jest.fn().mockReturnThis(),
-            clearCookie: jest.fn(),
-            cookie: jest.fn()
         };
-        next = jest.fn() as NextFunction;
-    });
 
-    afterEach(() => {
-        jest.clearAllMocks();
-    });
-
-    describe('login', () => {
-        it('should login a user', async () => {
-            const user = { id: 1, name: 'Test User' };
-            const accessToken = 'access-token';
-            const refreshToken = 'refresh-token';
-
-            req.body = { username: 'test', password: 'test' };
-            req.cookies![env.jwt.REFRESH_TOKEN_COOKIE_NAME] = 'some-refresh-token'; // Add the exclamation mark to assert non-null
-
-            (authService.login as jest.Mock).mockResolvedValue({ accessToken, refreshToken, user });
-
-            await authController.login(req as Request, res as Response, next);
-
-            expect(authService.login).toHaveBeenCalledWith(req.body, 'some-refresh-token');
-            expect(res.clearCookie).toHaveBeenCalledWith(env.jwt.ACCESS_TOKEN_COOKIE_NAME);
-            expect(res.cookie).toHaveBeenCalledWith(
-                env.jwt.ACCESS_TOKEN_COOKIE_NAME,
-                accessToken,
-                expect.objectContaining({ maxAge: 60000 })
-            );
-            expect(res.clearCookie).toHaveBeenCalledWith(env.jwt.REFRESH_TOKEN_COOKIE_NAME);
-            expect(res.cookie).toHaveBeenCalledWith(
-                env.jwt.REFRESH_TOKEN_COOKIE_NAME,
-                refreshToken,
-                expect.objectContaining({ maxAge: 60000 })
-            );
-            expect(sendResponse).toHaveBeenCalledWith(res, statusCodes.successful.CREATED, { data: user });
+        (authService.login as jest.Mock).mockResolvedValue({
+            accessToken: mockAccessToken,
+            refreshToken: mockRefreshToken,
+            user: mockUser,
         });
+
+        (authService.register as jest.Mock).mockResolvedValue(mockUser);
+        (authService.logout as jest.Mock).mockResolvedValue(mockUser);
+
+        (timeStringToMilliseconds as jest.Mock).mockImplementation((timeString) => {
+            if (timeString === env.jwt.ACCESS_TOKEN_EXPIRE_TIME) {
+                return 3600000; // 1 hour in milliseconds
+            }
+            if (timeString === env.jwt.REFRESH_TOKEN_EXPIRE_TIME) {
+                return 604800000; // 7 days in milliseconds
+            }
+        });
+
+        env.jwt.ACCESS_TOKEN_EXPIRE_TIME = mockAccessTokenExpireTime;
+        env.jwt.REFRESH_TOKEN_EXPIRE_TIME = mockRefreshTokenExpireTime;
     });
 
     describe('register', () => {
-        it('should register a user', async () => {
-            const user = { id: 1, name: 'Test User' };
+        it('should handle register and send response correctly', async () => {
+            const asyncHandler = authController.register;
 
-            req.body = { username: 'test', password: 'test' };
+            await asyncHandler(req as Request, res as Response, {} as NextFunction);
 
-            (authService.register as jest.Mock).mockResolvedValue(user);
+            expect(authService.register).toHaveBeenCalledWith(req.body, req.jwtPayload?.role);
+            expect(sendResponse).toHaveBeenCalledWith(res, statusCodes.successful.CREATED, { data: mockUser });
+        });
+    });
 
-            await authController.register(req as Request, res as Response, next);
+    describe('login', () => {
+        it('should handle login and set cookies correctly', async () => {
+            const asyncHandler = authController.login;
 
-            expect(authService.register).toHaveBeenCalledWith(req.body);
-            expect(sendResponse).toHaveBeenCalledWith(res, statusCodes.successful.CREATED, { data: user });
+            await asyncHandler(req as Request, res as Response, {} as NextFunction);
+
+            expect(authService.login).toHaveBeenCalledWith(
+                req.body,
+                (req.cookies as any)[env.jwt.REFRESH_TOKEN_COOKIE_NAME]
+            );
+
+            expect(res.clearCookie).toHaveBeenCalledWith(env.jwt.ACCESS_TOKEN_COOKIE_NAME);
+            expect(res.cookie).toHaveBeenCalledWith(env.jwt.ACCESS_TOKEN_COOKIE_NAME, mockAccessToken, {
+                httpOnly: true,
+                sameSite: 'none',
+                maxAge: 3600000, // Adjusted to match mock implementation
+            });
+
+            expect(res.clearCookie).toHaveBeenCalledWith(env.jwt.REFRESH_TOKEN_COOKIE_NAME);
+            expect(res.cookie).toHaveBeenCalledWith(env.jwt.REFRESH_TOKEN_COOKIE_NAME, mockRefreshToken, {
+                httpOnly: true,
+                sameSite: 'none',
+                maxAge: 604800000, // Adjusted to match mock implementation
+            });
+
+            expect(sendResponse).toHaveBeenCalledWith(res, statusCodes.successful.CREATED, { data: mockUser });
+        });
+    });
+
+    describe('logout', () => {
+        it('should handle logout and clear cookies correctly', async () => {
+            const asyncHandler = authController.logout;
+
+            await asyncHandler(req as Request, res as Response, {} as NextFunction);
+
+            expect(authService.logout).toHaveBeenCalledWith(req.jwtPayload!.userId);
+            expect(res.clearCookie).toHaveBeenCalledWith(env.jwt.ACCESS_TOKEN_COOKIE_NAME);
+            expect(res.clearCookie).toHaveBeenCalledWith(env.jwt.REFRESH_TOKEN_COOKIE_NAME);
+            expect(sendResponse).toHaveBeenCalledWith(res, statusCodes.successful.OK, { data: mockUser });
         });
     });
 });
