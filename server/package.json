@@ -4,9 +4,8 @@
     "description": "",
     "main": "./build/index.js",
     "scripts": {
-        "build": "rimraf ./build && npm run prisma:generate && tsc && tsc-alias",
+        "build": "rimraf ./build && prisma generate && tsc && tsc-alias",
         "start:dev": "cross-env NODE_ENV=\"development\" nodemon --watch \"./src/**\" --ext \"ts,json\" --ignore \"./src/**/*.spec.ts\" --exec \"ts-node src/index.ts\"",
-        "prisma:generate": "dotenv -e .env.development -- prisma generate",
         "prisma:push": "dotenv -e .env.development -- npx prisma db push",
         "prisma:seed:product": "dotenv -e .env.development -- npx ts-node src/database/seed/product.seed.ts"
     },
