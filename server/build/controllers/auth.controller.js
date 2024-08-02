@@ -25,7 +25,6 @@ exports.authController = {
         const cookieOptions = {
             httpOnly: true,
             sameSite: 'none',
-            secure: config_1.env.NODE_ENV === 'production',
         };
         res.clearCookie(config_1.env.jwt.ACCESS_TOKEN_COOKIE_NAME);
         res.cookie(config_1.env.jwt.ACCESS_TOKEN_COOKIE_NAME, accessToken, Object.assign(Object.assign({}, cookieOptions), { maxAge: (0, utils_1.timeStringToMilliseconds)(config_1.env.jwt.ACCESS_TOKEN_EXPIRE_TIME) }));
