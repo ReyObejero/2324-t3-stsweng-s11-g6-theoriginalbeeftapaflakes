@@ -12,6 +12,7 @@ export const authController = {
     }),
 
     login: asyncRequestHandlerWrapper(async (req: Request, res: Response): Promise<void> => {
+        console.log(env.cors.CORS_ORIGIN);
         const { accessToken, refreshToken, user } = await authService.login(
             req.body,
             req.cookies[env.jwt.REFRESH_TOKEN_COOKIE_NAME],
@@ -22,8 +23,6 @@ export const authController = {
             sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
             secure: env.NODE_ENV === 'production',
         };
-
-        console.log(env.cors.CORS_ORIGIN);
 
         res.clearCookie(env.jwt.ACCESS_TOKEN_COOKIE_NAME);
         res.cookie(env.jwt.ACCESS_TOKEN_COOKIE_NAME, accessToken, {
