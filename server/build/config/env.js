@@ -7,7 +7,6 @@ exports.env = void 0;
 const dotenv_1 = require("dotenv");
 const path_1 = __importDefault(require("path"));
 const zod_1 = require("zod");
-(0, dotenv_1.config)();
 (0, dotenv_1.config)({ path: path_1.default.resolve(__dirname, '../../.env') });
 (0, dotenv_1.config)({
     path: path_1.default.resolve(__dirname, `../../.env.${process.env.NODE_ENV}`),

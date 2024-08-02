@@ -14,7 +14,13 @@ const Login = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
-            const response = await axiosInstance.post(`${AUTH_URL}/login`, { username, password });
+            const response = await axiosInstance.post(
+                `${AUTH_URL}/login`,
+                { username, password },
+                {
+                    withCredentials: true,
+                },
+            );
 
             if (response.status === 201) {
                 setSuccessMessage('Login successful! Retrieving user information...');
