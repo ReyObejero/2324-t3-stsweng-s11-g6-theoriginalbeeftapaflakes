@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AdminDashboard.css';
 import deleteIcon from '../../Assets/delete.png';
 import { PRODUCT_URL } from '../../API/constants.js';
-import axiosInstance from '../../API/axiosInstance.js'
-import { decodeToken } from 'react-jwt';
+import axiosInstance from '../../API/axiosInstance.js';
+import { AuthContext } from '../../contexts';
 
 function EditModal({ isOpen, onClose, product, onSave }) {
     const [editedProduct, setEditedProduct] = useState({});
@@ -12,22 +12,27 @@ function EditModal({ isOpen, onClose, product, onSave }) {
 
     useEffect(() => {
         if (product && isOpen) {
+            console.log('Product Data:', product);
+
             const bottlesPerFlavorString = product.bottlesPerFlavor
                 ? product.bottlesPerFlavor.map(bottle => `${bottle.flavor}: ${bottle.quantity}`).join('\n')
                 : '';
 
-            setEditedProduct({
+            const updatedProduct = {
                 productImage: product.image || '',
                 productName: product.productName || '',
                 description: product.description || '',
                 packageOption: product.packageOption || '',
                 packageSize: product.packageSize || '',
                 bottlesPerFlavor: bottlesPerFlavorString || '',
-                price: product.price?.$numberDecimal?.toString() || '',
+                price: product.price?.toString() || '',
                 inventory: product.currentInventory?.toString() || '',
                 ingredients: product.ingredients || '',
-                nutritionalInfo: product.nutritionalInfo || '',
-            });
+            };
+
+            console.log('Updated Product:', updatedProduct);
+
+            setEditedProduct(updatedProduct);
         }
     }, [product, isOpen]);
 
@@ -49,7 +54,6 @@ function EditModal({ isOpen, onClose, product, onSave }) {
         }));
     };
 
-
     const handleSubmit = () => {
         if (editedProduct.bottlesPerFlavor) {
             const bottlesPerFlavorArray = editedProduct.bottlesPerFlavor.split('\n').map(line => {
@@ -57,13 +61,12 @@ function EditModal({ isOpen, onClose, product, onSave }) {
                 return { flavor, quantity: parseInt(quantity, 10) };
             });
 
-
             const updatedProduct = { ...editedProduct, bottlesPerFlavor: bottlesPerFlavorArray };
             onSave(product.productId, product.packageId, updatedProduct);
         } else {
             onSave(product.productId, product.packageId, editedProduct);
         }
-        handleImageUpload()
+        handleImageUpload();
         onClose();
         setImageFile(null);
     };
@@ -71,23 +74,20 @@ function EditModal({ isOpen, onClose, product, onSave }) {
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         setImageFile(file);
-    }
+    };
 
     const handleImageUpload = async () => {
         if (imageFile) {
             try {
                 const formData = new FormData();
                 formData.append('file', imageFile);
-                const response = await fetch(`https://tobtf.onrender.com/api/upload/${product.productId}`, {
-                    method: 'PUT',
-                    body: formData,
-                });
-    
-                if (!response.ok) {
+                const response = await axiosInstance.put(`/api/upload/${product.productId}`, formData);
+
+                if (response.status !== 200) {
                     throw new Error('Failed to upload image');
                 }
-    
-                const imageUrl = await response.json();
+
+                const imageUrl = response.data;
                 setEditedProduct(prevState => ({
                     ...prevState,
                     productImage: imageUrl,
@@ -96,8 +96,7 @@ function EditModal({ isOpen, onClose, product, onSave }) {
                 console.error('Error uploading image:', error);
             }
         }
-    }
-    
+    };
 
     if (!isOpen) return null;
 
@@ -111,7 +110,7 @@ function EditModal({ isOpen, onClose, product, onSave }) {
                             <tr key={key}>
                                 <td>{key.charAt(0).toUpperCase() + key.slice(1)}:</td>
                                 <td>
-                                    {['productName', 'description', 'packageOption', 'bottlesPerFlavor', 'ingredients', 'nutritionalInfo'].includes(key) ? (
+                                    {['productName', 'description', 'packageOption', 'bottlesPerFlavor', 'ingredients'].includes(key) ? (
                                         <textarea
                                             name={key}
                                             value={value}
@@ -124,11 +123,10 @@ function EditModal({ isOpen, onClose, product, onSave }) {
                                             <input
                                                 type="file"
                                                 name={key}
-                                                accept="image/"
+                                                accept="image/*"
                                                 onChange={handleImageChange}
                                             />
                                         </div>
-
                                     ) : (
                                         <input
                                             type={key === 'price' || key === 'inventory' || key === 'packageSize' ? 'number' : 'text'}
@@ -163,11 +161,9 @@ function AddModal({ isOpen, onClose, onSave }) {
         price: '',
         inventory: '',
         ingredients: '',
-        nutritionalInfo: '',
     });
     const [imageFile, setImageFile] = useState(null);
 
-    // Reset input fields upon opening modal
     useEffect(() => {
         if (isOpen) {
             resetForm();
@@ -177,7 +173,6 @@ function AddModal({ isOpen, onClose, onSave }) {
     const handleChange = (e) => {
         const { name, value } = e.target;
 
-        // If the input is of type number and the value is negative, set it to 0
         if (e.target.type === 'number' && parseFloat(value) < 0) {
             return setNewProduct(prevState => ({
                 ...prevState,
@@ -185,7 +180,6 @@ function AddModal({ isOpen, onClose, onSave }) {
             }));
         }
 
-        // Otherwise, update the state normally
         setNewProduct(prevState => ({
             ...prevState,
             [name]: value
@@ -202,7 +196,6 @@ function AddModal({ isOpen, onClose, onSave }) {
             price: '',
             inventory: '',
             ingredients: '',
-            nutritionalInfo: '',
         });
         setImageFile(null);
     };
@@ -214,7 +207,6 @@ function AddModal({ isOpen, onClose, onSave }) {
                 return { flavor, quantity: parseInt(quantity, 10) };
             });
 
-
             const updatedProduct = { ...newProduct, bottlesPerFlavor: bottlesPerFlavorArray };
             onSave(updatedProduct);
         } else {
@@ -223,7 +215,6 @@ function AddModal({ isOpen, onClose, onSave }) {
         onClose();
         resetForm();
     };
-
 
     if (!isOpen) return null;
 
@@ -237,33 +228,32 @@ function AddModal({ isOpen, onClose, onSave }) {
                             <tr key={key}>
                                 <td>{key.charAt(0).toUpperCase() + key.slice(1)}:</td>
                                 <td>
-                                    {['productName', 'description', 'packageOption', 'bottlesPerFlavor', 'ingredients', 'nutritionalInfo'].includes(key) ? (
+                                    {['productName', 'description', 'packageOption', 'bottlesPerFlavor', 'ingredients'].includes(key) ? (
                                         <textarea
                                             name={key}
                                             value={value}
                                             onChange={handleChange}
                                             placeholder={
                                                 key === 'productName' ? "e.g., Sub-Reseller Package" :
-                                                    key === 'description' ? "e.g., Discover convenience and profit with our..." :
-                                                        key === 'packageOption' ? "e.g., Package A" :
-                                                            key === 'bottlesPerFlavor' ? "<Flavor>: <Quantity> e.g.,\nClassic: 5\nSpicy: 5" :
-                                                                key === 'ingredients' ? "e.g., Beef, Salt, Pepper..." :
-                                                                    key === 'nutritionalInfo' ? "e.g., Placeholder" :
-                                                                        "Placeholder"
+                                                key === 'description' ? "e.g., Discover convenience and profit with our..." :
+                                                key === 'packageOption' ? "e.g., Package A" :
+                                                key === 'bottlesPerFlavor' ? "<Flavor>: <Quantity> e.g.,\nClassic: 5\nSpicy: 5" :
+                                                key === 'ingredients' ? "e.g., Beef, Salt, Pepper..." :
+                                                "Placeholder"
                                             }
                                             rows="3"
                                         />
                                     ) : (
                                         <input
-                                            type={key === 'price' || key === 'inventory' || key == 'packageSize' ? 'number' : 'text'}
+                                            type={key === 'price' || key === 'inventory' || key === 'packageSize' ? 'number' : 'text'}
                                             name={key}
                                             value={value}
                                             onChange={handleChange}
                                             placeholder={
                                                 key === 'packageSize' ? "e.g., 330" :
-                                                    key === 'price' ? "e.g., 1975.0" :
-                                                        key === 'inventory' ? "e.g., 10" :
-                                                            "Placeholder"
+                                                key === 'price' ? "e.g., 1975.0" :
+                                                key === 'inventory' ? "e.g., 10" :
+                                                "Placeholder"
                                             }
                                             step={key === 'price' ? '0.01' : '1'}
                                         />
@@ -281,6 +271,7 @@ function AddModal({ isOpen, onClose, onSave }) {
         </div>
     );
 }
+
 const PopupMessage = ({ message, type }) => {
     return (
         <div className={`popup-message ${type}`}>
@@ -295,11 +286,11 @@ const AdminDashboard = () => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [currentEditProduct, setCurrentEditProduct] = useState(null);
     const [filter, setFilter] = useState('');
-    const [token, setToken] = useState(localStorage.getItem('jwt'));
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const navigate = useNavigate();
-    
+    const { user } = useContext(AuthContext);
+
     useEffect(() => {
         // Display success message for 3 seconds then clear it
         if (successMessage) {
@@ -319,21 +310,6 @@ const AdminDashboard = () => {
             return () => clearTimeout(timeout);
         }
     }, [errorMessage]);
-    
-    useEffect(() => {
-    
-        // Check if there is a valid token in the local storage
-        if (!token) {
-            // Redirect to the login page if there is no token
-            navigate('/login');
-        } else {
-            const decoded_token = decodeToken(token);
-            const isAdmin = decoded_token.isAdmin;
-            if (!isAdmin) {
-                navigate('/');
-            }
-        }
-    }, [token, navigate])
 
     // Effect for disabling/enabling body scroll
     useEffect(() => {
@@ -347,13 +323,7 @@ const AdminDashboard = () => {
     const handleDelete = async (productId, packageId) => {
         if (window.confirm('Are you sure you want to delete this product?')) {
             try {
-                const token = localStorage.getItem('jwt');
-                const response = await axiosInstance.delete(`${PRODUCT_URL}/remove/${productId}/${packageId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
-                });
+                const response = await axiosInstance.delete(`${PRODUCT_URL}/remove/${productId}/${packageId}`);
 
                 if (response.status === 200) {
                     setSuccessMessage(response.data.message);
@@ -362,7 +332,7 @@ const AdminDashboard = () => {
                 console.log('Product deleted successfully');
 
                 // Remove the deleted product from the products list
-                setProducts(prevProducts => prevProducts.filter(product => !(product.productId === productId && product.packageId === packageId)));
+                setProducts(prevProducts => prevProducts.filter(product => !(product.id === productId && product.packageId === packageId)));
 
                 // Reset filter to show all products
                 setFilter('');
@@ -375,23 +345,25 @@ const AdminDashboard = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await axiosInstance.get(`${PRODUCT_URL}`);
+                const response = await axiosInstance.get(PRODUCT_URL);
                 if (response.status === 200) {
-                    const productsData = response.data;
+                    const productsData = response.data.data.items;
                     const flattenedProducts = productsData.flatMap(product =>
                         product.packages.map(packageItem => ({
-                            packageId: packageItem._id,
-                            productId: product._id,
+                            packageId: packageItem.id,
+                            productId: product.id,
                             productName: product.name,
                             description: product.description,
-                            packageOption: packageItem.packageOption,
-                            packageSize: packageItem.packageSize,
-                            bottlesPerFlavor: packageItem.bottlesPerFlavor,
+                            packageOption: packageItem.name,
+                            packageSize: packageItem.size,
+                            bottlesPerFlavor: packageItem.items.map(item => ({
+                                flavor: item.flavor.name,
+                                quantity: item.quantity
+                            })),
                             price: packageItem.price,
-                            currentInventory: packageItem.countInStock,
+                            currentInventory: packageItem.currentInventory,
                             ingredients: product.ingredients,
-                            nutritionalInfo: product.nutriInfo,
-                            image: product.image,
+                            image: product.imageUrl,
                             imageId: product.imageId
                         }))
                     );
@@ -419,30 +391,27 @@ const AdminDashboard = () => {
 
     const saveEdits = async (productId, packageId, updatedProduct) => {
         try {
-            const response = await axiosInstance.put(`${PRODUCT_URL}/${productId}/${packageId}`, JSON.stringify(updatedProduct), {
+            const response = await axiosInstance.put(`${PRODUCT_URL}/${productId}/${packageId}`, updatedProduct, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
                 },
             });
 
             if (response.status === 200)  {
-                setSuccessMessage(response.data.message)
+                setSuccessMessage(response.data.message);
 
                 setIsEditModalOpen(false);
             }
         } catch (error) {
-            setErrorMessage(error.response.data.message)
+            setErrorMessage(error.response.data.message);
         }
     };
 
     const handleAddProduct = async (newProductData) => {
         try {
-            // Send the new product data to the server
-            const response = await axiosInstance.post(`${PRODUCT_URL}/add`, JSON.stringify(newProductData), {
+            const response = await axiosInstance.post(`${PRODUCT_URL}/add`, newProductData, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
                 },
             });
 
@@ -452,18 +421,15 @@ const AdminDashboard = () => {
                 setProducts([...products, updatedProducts]);
                 setSuccessMessage(message);
             }
-           
-            // Close the modal after saving
+
             setIsAddModalOpen(false);
         } catch (error) {
             setErrorMessage(error.response.data.message);
         }
     };
 
-    // Unique product names for the filter dropdown
     const productNames = [...new Set(products.map(product => product.productName))];
 
-    // Filter products based on the selected product name
     const filteredProducts = products.filter(product => 
         filter === '' || product.productName === filter
     );
@@ -494,14 +460,13 @@ const AdminDashboard = () => {
                             <div className="admin-product-container">
                                 {filteredProducts.map((product) => (
                                     <div key={product.packageId} className="item">
-                                        <img src={`https://tobtf.onrender.com/${product.image}`} alt={product.productName} />
+                                        <img src={product.image} alt={product.productName} />
                                         <div className="admin-product-details">
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                 <p>{product.productName} [{product.packageOption}]</p>
                                                 <div className="product-action-buttons">
                                                     <button
                                                         className="open-product-btn"
-
                                                         onClick={() => navigateToProduct(product.productId)}
                                                     >
                                                         OPEN
@@ -521,7 +486,7 @@ const AdminDashboard = () => {
                                                         <p>Price: </p>
                                                     </div>
                                                     <div className="admin-price-value">
-                                                        <span>{parseFloat(product.price?.$numberDecimal)?.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}</span>
+                                                        <span>{parseFloat(product.price)?.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}</span>
                                                     </div>
                                                 </div>
                                                 <div className="admin-quantity-container">

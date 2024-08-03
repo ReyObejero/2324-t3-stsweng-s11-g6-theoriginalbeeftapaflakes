@@ -37,7 +37,9 @@ const Navbar = () => {
         const fetchCartItems = async () => {
             try {
                 const response = await axiosInstance.get(`${CARTS_URL}/me`, { withCredentials: true });
-                setCart(response.data.data);
+                const data = response.data.data;
+                setCart(data.items || []);
+                setCartItemCount(data.items ? data.items.length : 0);
             } catch (error) {
                 console.error('Error fetching cart items:', error);
             }
@@ -45,22 +47,6 @@ const Navbar = () => {
 
         if (isLoggedIn) {
             fetchCartItems();
-        }
-    }, [isLoggedIn]);
-
-    useEffect(() => {
-        const fetchCartItemCount = async () => {
-            try {
-                const response = await axiosInstance.get(`${CARTS_URL}/me`, { withCredentials: true });
-                const data = response.data;
-                setCartItemCount(data.items ? data.items.length : 0);
-            } catch (error) {
-                console.error('Error fetching cart item count:', error);
-            }
-        };
-
-        if (isLoggedIn) {
-            fetchCartItemCount();
         }
     }, [isLoggedIn]);
 
