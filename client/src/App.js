@@ -16,7 +16,7 @@ import AdminDashboard from './Components/Views/Admin/Admin.jsx';
 import OrderManagement from './Components/Views/OrderManagement/OrderManagement_Views.jsx';
 import CheckoutandStatus from './Components/Views/CheckoutandStatus/CS.jsx';
 import { AuthProvider } from './providers';
-import { Protect } from './Components/Protect.jsx';
+import { Orders } from './Components/Orders/orders.jsx';
 
 function App() {
     return (
@@ -37,6 +37,7 @@ function App() {
                         <Route path="/register" element={<Register />} />
                         <Route path="/createadmin" element={<CreateAdmin />} />
                         <Route path="/forgot-password" element={<ForgotPassword />} />
+                        <Route path="/orders" element={<Orders />} />
                         <Route path="/COS" element={<CheckoutandStatus />} />
                     </Routes>
                 </BrowserRouter>
