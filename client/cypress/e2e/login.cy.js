@@ -70,7 +70,7 @@ describe('Login Component', () => {
       cy.wait('@userRequest');
   
       cy.get('.p-success-message').should('contain', 'Login successful! Retrieving user information...');
-      cy.url().should('include', 'http://localhost:3000/'); 
+      cy.url().should('eq', 'http://localhost:3000/'); // Ensure the URL is the homepage URL 
     });
   
     it('should navigate to the register page when clicking the create account button', () => {
@@ -79,3 +79,4 @@ describe('Login Component', () => {
     });
   });
   
+ 
