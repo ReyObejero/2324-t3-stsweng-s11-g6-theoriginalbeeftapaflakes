@@ -56,7 +56,7 @@ const Navbar = () => {
         const fetchCartItemCount = async () => {
             try {
                 const response = await axiosInstance.get(`${CARTS_URL}/me`);
-                const data = response.data;
+                const data = response.data.data;
                 setCartItemCount(data.items.length);
 
                 if (response.status === 200) {

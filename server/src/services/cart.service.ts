@@ -273,6 +273,7 @@ export const cartService = {
         }
 
         await prismaClient.cartItem.delete({ where: { id: cartItem.id } });
+        await cartService.updateCartTotalPrice(cartItem.cartId);
 
         return cartItem;
     },
