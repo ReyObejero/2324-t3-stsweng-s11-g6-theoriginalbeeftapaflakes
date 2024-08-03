@@ -1,4 +1,3 @@
-// Navbar.jsx
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { AuthContext } from '../../contexts';
 import './Navbar.css';
@@ -12,9 +11,8 @@ import axiosInstance from '../../API/axiosInstance';
 
 const Navbar = () => {
     const { user, setUser, isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
-    const [cart, setCart] = useState();
+    const [cart, setCart] = useState([]);
     const [cartItemCount, setCartItemCount] = useState(0);
-    const [loading, setLoading] = useState(true);
     const [openDropdown, setOpenDropdown] = useState(null);
     const navbarRef = useRef(null);
 
@@ -38,40 +36,33 @@ const Navbar = () => {
     useEffect(() => {
         const fetchCartItems = async () => {
             try {
-                const response = await axiosInstance.get(`${CARTS_URL}/me`);
+                const response = await axiosInstance.get(`${CARTS_URL}/me`, { withCredentials: true });
                 setCart(response.data.data);
-                setLoading(false);
             } catch (error) {
                 console.error('Error fetching cart items:', error);
-                setLoading(false);
             }
         };
 
         if (isLoggedIn) {
             fetchCartItems();
         }
-    }, [isLoggedIn, user?.token]);
+    }, [isLoggedIn]);
 
     useEffect(() => {
         const fetchCartItemCount = async () => {
             try {
-                const response = await axiosInstance.get(`${CARTS_URL}/me`);
+                const response = await axiosInstance.get(`${CARTS_URL}/me`, { withCredentials: true });
                 const data = response.data;
-                setCartItemCount(data.items.length);
-
-                if (response.status === 200) {
-                } else {
-                    setCartItemCount(0);
-                }
+                setCartItemCount(data.items ? data.items.length : 0);
             } catch (error) {
-                console.log('Error fetching cart item count:', error);
+                console.error('Error fetching cart item count:', error);
             }
         };
 
         if (isLoggedIn) {
             fetchCartItemCount();
         }
-    }, [isLoggedIn, user?.token]);
+    }, [isLoggedIn]);
 
     const redirectTo = (route) => {
         window.location.href = route;
@@ -79,29 +70,24 @@ const Navbar = () => {
 
     const handleLogout = async () => {
         try {
-            const response = await axiosInstance.delete(`${AUTH_URL}/logout`);
+            await axiosInstance.delete(`${AUTH_URL}/logout`, { withCredentials: true });
             setUser(null);
             setIsLoggedIn(false);
             redirectTo('/login');
         } catch (error) {
-            console.log('Logout error: ', error);
+            console.error('Logout error:', error);
         }
     };
 
     return (
         <div className="navbar" ref={navbarRef}>
-            <div className="nav-logo">
+            <div className="nav-logo" onClick={() => redirectTo('/')}>
                 <img src={logoMain} alt="" className="logo-img" />
             </div>
             <div className="nav-right">
                 <ul className="nav-menu">
-                    <li className="nav-item" onClick={() => redirectTo('/')}>
-                        Home
-                    </li>
-
-                    <li className="nav-item" onClick={() => redirectTo('/products')}>
-                        Products
-                    </li>
+                    <li className="nav-item" onClick={() => redirectTo('/')}>Home</li>
+                    <li className="nav-item" onClick={() => redirectTo('/products')}>Products</li>
 
                     <DropdownButton
                         id="about"
@@ -117,7 +103,7 @@ const Navbar = () => {
                         </DropdownMenu>
                     </DropdownButton>
 
-                    {user?.isAdmin && (
+                    {user?.role === 'ADMIN' && (
                         <DropdownButton
                             id="navbar-admin"
                             title="Admin Dashboard"
@@ -137,7 +123,7 @@ const Navbar = () => {
                     <div className="nav-cart-count">{cartItemCount}</div>
                     <DropdownButton
                         id="user"
-                        title={<img src={user?.isAdmin ? userAdmin : userIcon} alt="User" className="user-img" />}
+                        title={<img src={user?.role === 'ADMIN' ? userAdmin : userIcon} alt="User" className="user-img" />}
                         openDropdown={openDropdown}
                         onToggle={handleDropdownToggle}
                     >
@@ -146,11 +132,9 @@ const Navbar = () => {
                                 <>
                                     <div className="username-display">
                                         Logged in as{' '}
-                                        <span
-                                            style={{ color: '#FF0000', fontWeight: 'bold' }}
-                                        >{`${user?.username}`}</span>
+                                        <span style={{ color: '#FF0000', fontWeight: 'bold' }}>{user?.username}</span>
                                     </div>
-                                    {user?.isAdmin && (
+                                    {user?.role === 'ADMIN' && (
                                         <button onClick={() => redirectTo('/createadmin')}>Create New Admin</button>
                                     )}
                                     <button onClick={handleLogout}>Logout</button>
