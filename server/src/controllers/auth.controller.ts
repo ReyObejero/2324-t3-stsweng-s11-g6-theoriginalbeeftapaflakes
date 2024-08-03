@@ -20,7 +20,7 @@ export const authController = {
         const cookieOptions: CookieOptions = {
             httpOnly: true,
             sameSite: 'none',
-            secure: env.NODE_ENV === 'production',
+            secure: true,
         };
 
         res.clearCookie(env.jwt.ACCESS_TOKEN_COOKIE_NAME);
