@@ -58,7 +58,7 @@ const Register = () => {
         <div className="register-container">
             <div className="form-container">
                 <h2>CREATE YOUR ACCOUNT</h2>
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} noValidate>
                     <div className="register-input-group">
                         <label htmlFor="email">Email Address *</label>
                         <input
