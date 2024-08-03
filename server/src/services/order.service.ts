@@ -146,9 +146,9 @@ export const orderService = {
             throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.DATE_INVALID);
         }
 
-        if (user.role !== 'ADMIN' && updatedStatus !== 'DELIVERED' && updatedStatus !== 'CANCELLED') {
+        /*if (user.role !== 'ADMIN' && updatedStatus !== 'DELIVERED' && updatedStatus !== 'CANCELLED') {
             throw createError(statusCodes.clientError.BAD_REQUEST, errorMessages.ORDER_STATUS_UPDATE_DENIED);
-        }
+        }*/
 
         const statusDateFields: Record<string, string> = {
             CONFIRMED: 'confirmedAt',
