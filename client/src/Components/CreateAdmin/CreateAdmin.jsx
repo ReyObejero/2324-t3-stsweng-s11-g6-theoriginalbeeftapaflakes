@@ -36,6 +36,12 @@ const CreateAdmin = () => {
             return;
         }
 
+        if (password !== confirmPassword) {
+            setErrorMessage('Passwords do not match');
+            setErrorOption('password');
+            return;
+        }
+
         try {
             const formData = {
                 email: email,
@@ -64,14 +70,7 @@ const CreateAdmin = () => {
             }
         } catch (error) {
             if (error.response && error.response.status === 400) {
-                if (error.response.data.errorOption === 'email') {
-                    setErrorOption(error.response.data.errorOption);
-                } else if (error.response.data.errorOption === 'username') {
-                    setErrorOption(error.response.data.errorOption);
-                } else if (error.response.data.errorOption === 'password') {
-                    setErrorOption(error.response.data.errorOption);
-                }
-
+                setErrorOption(error.response.data.errorOption);
                 setErrorMessage(error.response.data.message);
             } else {
                 console.error('Register error:', error);
@@ -79,11 +78,16 @@ const CreateAdmin = () => {
         }
     };
 
+    useEffect(() => {
+        console.log('Error option:', errorOption);
+        console.log('Error message:', errorMessage);
+    }, [errorOption, errorMessage]);
+
     return (
         <div className="register-container">
             <div className="form-container">
                 <h2>CREATE YOUR ADMIN ACCOUNT</h2>
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} noValidate>
                     <div className="register-input-group">
                         <label htmlFor="email">Email Address *</label>
                         <input type="email" className="register-input-field" id="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
