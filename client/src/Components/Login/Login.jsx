@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
 import { AUTH_URL, USERS_URL } from '../../API/constants.js';
+import { AuthContext } from '../../contexts';
 import axiosInstance from '../../API/axiosInstance.js';
 
 const Login = () => {
@@ -10,34 +11,26 @@ const Login = () => {
     const [loginError, setLoginError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const navigate = useNavigate();
+    const { setUser, setIsLoggedIn } = useContext(AuthContext);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
             const response = await axiosInstance.post(`${AUTH_URL}/login`, { username, password });
+            setSuccessMessage('Login successful! Retrieving user information...');
 
-            if (response.status === 201) {
-                setSuccessMessage('Login successful! Retrieving user information...');
+            try {
+                const loggedInUser = (await axiosInstance.get(`${USERS_URL}/me`)).data.data;
+                setUser(loggedInUser);
+                setIsLoggedIn(true);
 
-                try {
-                    const userResponse = await axiosInstance.get(`${USERS_URL}/me`);
-
-                    if (userResponse.status === 200) {
-                        setTimeout(() => {
-                            navigate('/');
-                        }, 2000);
-                    } else {
-                        setLoginError('Failed to retrieve user information.');
-                        setSuccessMessage('');
-                    }
-                } catch (error) {
-                    setLoginError('Failed to retrieve user information.');
-                    setSuccessMessage('');
-                    console.error('Error retrieving user info:', error);
-                }
-            } else {
-                setLoginError('Login failed. Please check your credentials.');
+                setTimeout(() => {
+                    navigate('/');
+                }, 2000);
+            } catch (error) {
+                setLoginError('Failed to retrieve user information.');
                 setSuccessMessage('');
+                console.error('Error retrieving user info:', error);
             }
         } catch (error) {
             setLoginError('Login failed. Please check your credentials.');

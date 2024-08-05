@@ -81,14 +81,16 @@ describe('authController', () => {
             expect(res.cookie).toHaveBeenCalledWith(env.jwt.ACCESS_TOKEN_COOKIE_NAME, mockAccessToken, {
                 httpOnly: true,
                 sameSite: 'none',
-                maxAge: 3600000, // Adjusted to match mock implementation
+                secure: true, // Added secure property
+                maxAge: 3600000, // 1 hour in milliseconds
             });
 
             expect(res.clearCookie).toHaveBeenCalledWith(env.jwt.REFRESH_TOKEN_COOKIE_NAME);
             expect(res.cookie).toHaveBeenCalledWith(env.jwt.REFRESH_TOKEN_COOKIE_NAME, mockRefreshToken, {
                 httpOnly: true,
                 sameSite: 'none',
-                maxAge: 604800000, // Adjusted to match mock implementation
+                secure: true, // Added secure property
+                maxAge: 604800000, // 7 days in milliseconds
             });
 
             expect(sendResponse).toHaveBeenCalledWith(res, statusCodes.successful.CREATED, { data: mockUser });

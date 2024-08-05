@@ -1,7 +1,8 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../API/axiosInstance.js'; 
-import { USERS_URL } from '../../API/constants.js';
+import { AUTH_URL } from '../../API/constants.js';
+import { AuthContext } from '../../contexts';
 import './CreateAdmin.css';
 
 const CreateAdmin = () => {
@@ -12,16 +13,14 @@ const CreateAdmin = () => {
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [errorOption, setErrorOption] = useState('');
-    const [token, setToken] = useState(localStorage.getItem('jwt'));
     const navigate = useNavigate();
+    const { user } = useContext(AuthContext);
 
-    useEffect(() => {
-        // Check if there is a valid token in the local storage
-        if (!token) {
-            // Redirect to the login page if there is no token
-            navigate('/login');
-        }
-    }, [token, navigate])
+    // useEffect(() => {
+    //     if (!user || user?.role !== 'ADMIN') {
+    //         navigate('/login');
+    //     }
+    // }, [user, navigate]);
 
     const validateEmail = (email) => {
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -43,19 +42,18 @@ const CreateAdmin = () => {
                 username: username,
                 password: password,
                 confirmPassword: confirmPassword
-            }
-            const response = await axiosInstance.post(`${USERS_URL}/createadmin`, formData, { 
+            };
+
+            const response = await axiosInstance.post(`${AUTH_URL}/register/admin`, formData, { 
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 },
             });
 
             if (response.status === 201) {
                 setErrorOption('');
-                setErrorMessage('')
+                setErrorMessage('');
                 setSuccessMessage(response.data.message);
-                // Reset input fields
                 setEmail('');
                 setUsername('');
                 setPassword('');
