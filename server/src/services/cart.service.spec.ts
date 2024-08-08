@@ -27,7 +27,7 @@ jest.mock('@/database', () => ({
     },
 }));
 
-// Directly mock cartService functions as jest.fn()
+
 cartService.getCartByUserId = jest.fn();
 cartService.getCartById = jest.fn();
 cartService.getCartItemById = jest.fn();

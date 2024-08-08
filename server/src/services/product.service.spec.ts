@@ -6,7 +6,7 @@ import { reviewService } from './review.service';
 import createError from 'http-errors';
 import { statusCodes, errorMessages } from '@/constants';
 
-// Mock dependencies
+
 jest.mock('@/database', () => ({
     prismaClient: {
         product: {

@@ -20,8 +20,8 @@ describe('Cart Controller', () => {
             params: {},
             body: {},
             jwtPayload: {
-                userId: 1, // Ensure this is a number
-                role: 'USER' // Add role property
+                userId: 1, 
+                role: 'USER' 
             }
         };
         res = {
