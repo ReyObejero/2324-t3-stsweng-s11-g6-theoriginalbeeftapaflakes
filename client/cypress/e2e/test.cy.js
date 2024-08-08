@@ -1,6 +1,6 @@
 describe('Register Component', () => {
   beforeEach(() => {
-    cy.visit('http://localhost:3000/register'); // Adjust the URL path as needed
+    cy.visit('http://localhost:3000/register'); 
   });
 
   it('should display the registration form', () => {
@@ -24,10 +24,10 @@ describe('Register Component', () => {
     cy.get('input#password').type('password');
     cy.get('input#confirmPassword').type('password');
     cy.get('button[type="submit"]').click();
-     // Debugging: Check if the error message exists
+     
      cy.wait(500);
 
-    // Check the error message content
+    
     cy.get('.p-error-bubble').should('contain', 'Please enter a valid email address');
   
   });
@@ -58,7 +58,7 @@ describe('Register Component', () => {
 describe('Login Component', () => {
     beforeEach(() => {
       cy.visit('http://localhost:3000/login'); 
-      // Adjust the URL path as needed
+    
     });
   
     it('should display the login form', () => {
@@ -92,7 +92,7 @@ describe('Login Component', () => {
         cy.wait('@userRequest');
     
         cy.get('.p-success-message').should('contain', 'Login successful! Retrieving user information...');
-        cy.url().should('include', '/'); // Adjust based on your redirection logic
+        cy.url().should('include', '/'); 
     });
 
     it('should display an error message for invalid credentials', () => {
@@ -128,7 +128,7 @@ describe('Login Component', () => {
       cy.wait('@userRequest');
   
       cy.get('.p-success-message').should('contain', 'Login successful! Retrieving user information...');
-      cy.url().should('eq', 'http://localhost:3000/'); // Ensure the URL is the homepage URL 
+      cy.url().should('eq', 'http://localhost:3000/'); 
     });
   
     it('should navigate to the register page when clicking the create account button', () => {
@@ -137,11 +137,9 @@ describe('Login Component', () => {
     });
   });
   
-  // cypress/integration/product_list_spec.js
 
 describe('Product List and Product Page', () => {
   beforeEach(() => {
-      // Intercept the GET request to the products API and respond with fixture data
       cy.intercept('GET', 'http://localhost:8080/products', {
           statusCode: 200,
           body: {
@@ -178,7 +176,6 @@ describe('Product List and Product Page', () => {
           }
       }).as('getProducts');
 
-      // Intercept the GET request to fetch product details
       cy.intercept('GET', 'http://localhost:8080/products/*', {
           statusCode: 200,
           body: {
@@ -218,7 +215,6 @@ describe('Product List and Product Page', () => {
           }
       }).as('getProduct');
 
-      // Intercept the POST request to add product to cart
       cy.intercept('POST', 'http://localhost:8080/carts/items', {
           statusCode: 200,
           body: {
@@ -226,21 +222,16 @@ describe('Product List and Product Page', () => {
           }
       }).as('addToCart');
 
-      // Visit the product list page
       cy.visit('http://localhost:3000/products');
   });
 
   it('should display the product list', () => {
-      // Wait for the products to be fetched
       cy.wait('@getProducts');
 
-      // Check if the product list header is displayed
       cy.get('h1').contains('PRODUCT LIST');
 
-      // Check if the products are displayed
       cy.get('.productlist-image-container').should('have.length', 3);
 
-      // Check if the product details are displayed correctly
       cy.get('.productlist-image-container').eq(0).within(() => {
           cy.get('img').should('have.attr', 'src').and('include', 'sub-reseller-package.jpg');
           cy.get('h3').contains('Sub-Reseller Package');
@@ -261,16 +252,12 @@ describe('Product List and Product Page', () => {
   });
 
   it('should navigate to a product page and display product details', () => {
-      // Wait for the products to be fetched
       cy.wait('@getProducts');
 
-      // Click on the first product
       cy.get('.productlist-image-container').eq(0).click();
 
-      // Wait for the product details to be fetched
       cy.wait('@getProduct');
 
-      // Check if the product details are displayed correctly
       cy.get('h1').contains('Sub-Reseller Package');
       cy.get('.p-details-container img').should('have.attr', 'src').and('include', 'sub-reseller-package.jpg');
       cy.get('.p-product-description').contains('This is a sample product description.');
@@ -279,67 +266,48 @@ describe('Product List and Product Page', () => {
   });
 
   it('should display package details when a package is selected', () => {
-      // Wait for the products to be fetched
       cy.wait('@getProducts');
 
-      // Click on the first product
       cy.get('.productlist-image-container').eq(0).click();
 
-      // Wait for the product details to be fetched
       cy.wait('@getProduct');
 
-      // Select the first package
       cy.get('.p-package-button').contains('Package A').click();
 
-      // Check if the package details are displayed
       cy.get('.p-price').contains('₱1,975.00');
       cy.get('ul').contains('Original (330g): 3');
 
-      // Select the second package
       cy.get('.p-package-button').contains('Package B').click();
 
-      // Check if the package details are updated
       cy.get('.p-price').contains('₱3,075.00');
       cy.get('ul').contains('Spicy (330g): 5');
   });
 
   it('should display a warning message if no package is selected when adding to cart', () => {
-      // Wait for the products to be fetched
       cy.wait('@getProducts');
 
-      // Click on the first product
       cy.get('.productlist-image-container').eq(0).click();
 
-      // Wait for the product details to be fetched
       cy.wait('@getProduct');
 
-      // Try to add to cart without selecting a package
       cy.get('.p-add-to-cart').click();
 
-      // Check if the warning message is displayed
       cy.get('.p-error-bubble').contains('Please select a package').should('be.visible');
   });
 
   it('should add product to cart successfully when a package is selected', () => {
-      // Wait for the products to be fetched
       cy.wait('@getProducts');
 
-      // Click on the first product
       cy.get('.productlist-image-container').eq(0).click();
 
-      // Wait for the product details to be fetched
       cy.wait('@getProduct');
 
-      // Select a package
       cy.get('.p-package-button').contains('Package A').click();
 
-      // Add to cart
       cy.get('.p-add-to-cart').click();
 
-      // Wait for the add to cart request
       cy.wait('@addToCart');
 
-      // Check if the success message is displayed
       cy.get('.p-success-message').contains('Product added to cart successfully!').should('be.visible');
   });
   it('should successfully checkout and confirmed in cart', () => {
@@ -362,14 +330,11 @@ describe('Product List and Product Page', () => {
 });
 
 
-  // cypress/integration/create_admin_spec.js
-
 describe('Create Admin', () => {
   beforeEach(() => {
       cy.intercept('POST', 'http://localhost:8080/auth/register/admin', (req) => {
           const { email, username, password, confirmPassword } = req.body;
       
-          // Check for validation errors
           if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
               req.reply({
                   statusCode: 400,
@@ -392,7 +357,6 @@ describe('Create Admin', () => {
               return;
           }
       
-          // Simulate successful creation
           req.reply({
               statusCode: 201,
               body: {
