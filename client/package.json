@@ -7,7 +7,7 @@
             "localhost",
             ".localhost"
         ],
-        "proxy": "http://localhost:8080"
+        "proxy": "https://two324-t3-stsweng-s11-g6.onrender.com/"
     },
     "dependencies": {
         "@fvilers/disable-react-devtools": "^1.3.0",
